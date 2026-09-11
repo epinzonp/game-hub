@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 
-type Cell = "X" | "O" | null;
+type Cell = "X" | "O" | "draw" | null;
 type Player = "X" | "O";
 type GameMode = "pvp" | "ai";
 type Difficulty = "easy" | "medium" | "hard";

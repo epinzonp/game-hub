@@ -96,6 +96,7 @@ export default function PinPon({ onBack }: { onBack: () => void }) {
         }
 
         function resetBall() {
+          if (!canvas) return;
           s.ballX = canvas.width / 2;
           s.ballY = canvas.height / 2;
           s.ballDX = s.ballDX > 0 ? -4 : 4;

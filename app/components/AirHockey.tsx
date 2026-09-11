@@ -25,7 +25,7 @@ export default function AirHockey({ onBack }: { onBack: () => void }) {
   const puckRef = useRef({ x: TABLE_WIDTH / 2, y: TABLE_HEIGHT / 2, vx: 3, vy: 3 });
   const playerRef = useRef({ x: TABLE_WIDTH / 2, y: TABLE_HEIGHT - 50 });
   const enemyRef = useRef({ x: TABLE_WIDTH / 2, y: 50 });
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number | null>(null);
 
   const updatePhysics = () => {
     const puck = puckRef.current;
@@ -53,7 +53,8 @@ export default function AirHockey({ onBack }: { onBack: () => void }) {
         confetti({
           particleCount: 100,
           spread: 70,
-          origin: { y: 0.6 }
+          origin: { y: 0.6 },
+          zIndex: 1000
         });
         setScore(s => {
           const ns = { ...s, player: s.player + 1 };
@@ -74,7 +75,8 @@ export default function AirHockey({ onBack }: { onBack: () => void }) {
         confetti({
           particleCount: 100,
           spread: 70,
-          origin: { y: 0.6 }
+          origin: { y: 0.6 },
+          zIndex: 1000
         });
         setScore(s => {
           const ns = { ...s, enemy: s.enemy + 1 };
