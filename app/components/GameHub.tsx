@@ -14,6 +14,19 @@ export default function GameHub() {
   const [currentGame, setCurrentGame] = useState<GameId>(null);
   const [daysLeft, setDaysLeft] = useState(10);
 
+  const handleGameSelect = (game: GameId) => {
+    if (game === "store" || game === "friends") {
+      setCurrentGame(game);
+      return;
+    }
+    if (!localStorage.getItem("user-cube")) {
+      alert("Antes de empezar tienes que ir a la tienda y escoger el avatar");
+      setCurrentGame("store");
+      return;
+    }
+    setCurrentGame(game);
+  };
+
   useEffect(() => {
     const savedDate = localStorage.getItem("next-game-date");
     if (!savedDate) {
@@ -130,10 +143,10 @@ export default function GameHub() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <button
-          onClick={() => setCurrentGame("hangman")}
-          className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-        >
+         <button
+           onClick={() => handleGameSelect("hangman")}
+           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+         >
           <div className="relative z-10">
             <h3 className="text-2xl font-bold text-white">El Ahorcado</h3>
             <p className="mt-2 text-sm text-zinc-400">Adivina la palabra antes de que el muñeco caiga en la lava.</p>
@@ -143,10 +156,10 @@ export default function GameHub() {
           </div>
         </button>
 
-        <button
-          onClick={() => setCurrentGame("tiragol")}
-          className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-        >
+         <button
+           onClick={() => handleGameSelect("tiragol")}
+           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+         >
           <div className="relative z-10">
             <h3 className="text-2xl font-bold text-white">Tiragol</h3>
             <p className="mt-2 text-sm text-zinc-400">¡Lanza el balón y marca el mejor récord de goles!</p>
@@ -156,10 +169,10 @@ export default function GameHub() {
           </div>
         </button>
 
-        <button
-          onClick={() => setCurrentGame("airhockey")}
-          className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-        >
+         <button
+           onClick={() => handleGameSelect("airhockey")}
+           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+         >
           <div className="relative z-10">
             <h3 className="text-2xl font-bold text-white">Hockey de Aire</h3>
             <p className="mt-2 text-sm text-zinc-400">Desliza el disco y vence a la IA o a un amigo.</p>
@@ -169,10 +182,10 @@ export default function GameHub() {
           </div>
         </button>
 
-        <button
-          onClick={() => setCurrentGame("botecolor")}
-          className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-        >
+         <button
+           onClick={() => handleGameSelect("botecolor")}
+           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+         >
           <div className="relative z-10">
             <h3 className="text-2xl font-bold text-white">Botecolor</h3>
             <p className="mt-2 text-sm text-zinc-400">Organiza los colores en las botellas.</p>
@@ -182,10 +195,10 @@ export default function GameHub() {
           </div>
         </button>
 
-        <button
-          onClick={() => setCurrentGame("pinpon")}
-          className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-        >
+         <button
+           onClick={() => handleGameSelect("pinpon")}
+           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+         >
           <div className="relative z-10">
             <h3 className="text-2xl font-bold text-white">Pin Pon</h3>
             <p className="mt-2 text-sm text-zinc-400">¡Rápido y divertido! Rebota la pelota y gana.</p>
@@ -195,10 +208,10 @@ export default function GameHub() {
           </div>
         </button>
 
-         <button
-           onClick={() => setCurrentGame("radiotricky")}
-           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-         >
+          <button
+            onClick={() => handleGameSelect("radiotricky")}
+            className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+          >
            <div className="relative z-10">
              <h3 className="text-2xl font-bold text-white">Radiotricky</h3>
              <p className="mt-2 text-sm text-zinc-400">Tres en Raya con onda. VS Amigo o IA.</p>
