@@ -39,7 +39,7 @@ export default function GameHub() {
       const now = new Date();
       const next = new Date(localStorage.getItem("next-game-date") || "");
       const diffTime = next.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
       setDaysLeft(diffDays > 0 ? diffDays : 0);
     };
 
