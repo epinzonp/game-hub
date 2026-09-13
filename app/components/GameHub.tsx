@@ -83,12 +83,13 @@ export default function GameHub() {
   if (currentGame === "store") {
     const coins = parseInt(localStorage.getItem("user-coins") || "0");
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-zinc-900 text-white">
+      <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-zinc-900 text-white relative">
+        <div className="absolute top-8 right-8 bg-zinc-800 px-4 py-2 rounded-full border border-amber-600 flex items-center gap-2 shadow-lg">
+          <span className="text-2xl">💰</span>
+          <span className="text-xl font-bold text-amber-400">{coins}</span>
+        </div>
         <div className="flex flex-col items-center gap-2">
           <h1 className="text-6xl font-black italic">TIENDA DE <span className="text-amber-500">CUBITOS</span></h1>
-          <div className="text-2xl font-bold text-amber-400 bg-zinc-800 px-4 py-1 rounded-full border border-amber-600">
-            💰 {coins} monedas
-          </div>
         </div>
          <div className="grid grid-cols-3 gap-6">
            {[
