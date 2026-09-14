@@ -236,50 +236,50 @@ export function reproducirRisa() {
     osc.stop(ctx.currentTime + 0.1);
   }
 
-  export function reproducirFunkVictoria() {
-    const ctx = getCtx();
-    if (!ctx) return;
-    const t0 = ctx.currentTime;
+  export function reproducirFunkLoop() {
+  const ctx = getCtx();
+  if (!ctx) return;
+  const t0 = ctx.currentTime;
 
-    // Bajo Funk (Sincopado)
-    const bajo = ctx.createOscillator();
-    const bajoGain = ctx.createGain();
-    bajo.type = "square";
-    bajo.frequency.setValueAtTime(55, t0); // A1
-    bajoGain.gain.setValueAtTime(0, t0);
-    
-    // Ritmo funk simple (tump tump tss)
-    const ritmo = [0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75];
-    ritmo.forEach((time, i) => {
-      if (i % 2 === 0) {
-        bajoGain.gain.linearRampToValueAtTime(0.2, t0 + time + 0.01);
-        bajoGain.gain.linearRampToValueAtTime(0, t0 + time + 0.1);
-      }
-    });
+  const bajo = ctx.createOscillator();
+  const bajoGain = ctx.createGain();
+  bajo.type = "square";
+  bajo.frequency.setValueAtTime(55, t0);
+  bajoGain.gain.setValueAtTime(0, t0);
+  
+  const ritmo = [0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75];
+  ritmo.forEach((time) => {
+    bajoGain.gain.linearRampToValueAtTime(0.15, t0 + time + 0.01);
+    bajoGain.gain.linearRampToValueAtTime(0, t0 + time + 0.1);
+  });
 
-    bajo.connect(bajoGain).connect(ctx.destination);
-    bajo.start(t0);
-    bajo.stop(t0 + 2);
+  bajo.connect(bajoGain).connect(ctx.destination);
+  bajo.start(t0);
+  bajo.stop(t0 + 2);
 
-    // Melodía Funk brillante
-    const notasFunk = [
-      { f: 440, t: 0.1, d: 0.1 }, // A4
-      { f: 523, t: 0.3, d: 0.1 }, // C5
-      { f: 587, t: 0.5, d: 0.1 }, // D5
-      { f: 659, t: 0.7, d: 0.2 }, // E5
-    ];
+  const notasFunk = [
+    { f: 440, t: 0.1, d: 0.1 },
+    { f: 523, t: 0.3, d: 0.1 },
+    { f: 587, t: 0.5, d: 0.1 },
+    { f: 659, t: 0.7, d: 0.2 },
+  ];
 
-    notasFunk.forEach(n => {
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(n.f, t0 + n.t);
-      g.gain.setValueAtTime(0, t0 + n.t);
-      g.gain.linearRampToValueAtTime(0.1, t0 + n.t + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.t + n.d);
-      osc.connect(g).connect(ctx.destination);
-      osc.start(t0 + n.t);
-      osc.stop(t0 + n.t + n.d + 0.05);
-    });
-  }
+  notasFunk.forEach(n => {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(n.f, t0 + n.t);
+    g.gain.setValueAtTime(0, t0 + n.t);
+    g.gain.linearRampToValueAtTime(0.08, t0 + n.t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.t + n.d);
+    osc.connect(g).connect(ctx.destination);
+    osc.start(t0 + n.t);
+    osc.stop(t0 + n.t + n.d + 0.05);
+  });
+}
+
+export function reproducirFunkVictoria() {
+  reproducirFunkLoop();
+}
+
 

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { reproducirFunkLoop } from "@/lib/sonido";
 import HangmanGameWrapper from "./HangmanGameWrapper";
 import Tiragol from "./Tiragol";
 import AirHockey from "./AirHockey";
@@ -45,6 +46,12 @@ export default function GameHub() {
 
     calculateDays();
   }, []);
+
+  useEffect(() => {
+    if (currentGame !== null) return;
+    const interval = setInterval(reproducirFunkLoop, 2000);
+    return () => clearInterval(interval);
+  }, [currentGame]);
 
   if (currentGame === "hangman") {
     return <HangmanGameWrapper onBack={() => setCurrentGame(null)} />;
@@ -135,7 +142,10 @@ export default function GameHub() {
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-12 p-6 text-center bg-gradient-to-br from-yellow-500 via-blue-500 to-red-500">
+    <div className="flex h-full flex-col items-center justify-center gap-12 p-6 text-center bg-gradient-to-br from-yellow-500 via-blue-500 to-red-500 relative">
+      <div className="absolute bottom-4 right-6 text-white/60 text-sm font-medium italic">
+        por: ernesto pinzon
+      </div>
       <div>
         <h1 className="text-7xl font-black tracking-tight text-white">
           GAME <span className="text-amber-500">HUB</span>
