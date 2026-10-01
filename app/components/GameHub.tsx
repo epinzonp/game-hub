@@ -8,12 +8,15 @@ import AirHockey from "./AirHockey";
 import Botecolor from "./Botecolor";
 import Radiotricky from "./Radiotricky";
 import PinPon from "./PinPon";
+import NoLeDesOPegale from "./NoLeDesOPegale";
 
-type GameId = "hangman" | "tiragol" | "airhockey" | "botecolor" | "pinpon" | "radiotricky" | "friends" | "store" | null;
+type GameId = "hangman" | "tiragol" | "airhockey" | "botecolor" | "pinpon" | "radiotricky" | "friends" | "store" | "noledes";
 
 export default function GameHub() {
   const [currentGame, setCurrentGame] = useState<GameId>(null);
   const [daysLeft, setDaysLeft] = useState(10);
+  const [musicaActiva, setMusicaActiva] = useState(true);
+  const [tiempoMusica, setTiempoMusica] = useState(0);
 
   const handleGameSelect = (game: GameId) => {
     if (game === "store" || game === "friends") {
@@ -48,10 +51,19 @@ export default function GameHub() {
   }, []);
 
   useEffect(() => {
-    if (currentGame !== null) return;
-    const interval = setInterval(reproducirFunkLoop, 2000);
+    if (currentGame !== null || !musicaActiva) return;
+    const interval = setInterval(() => {
+      reproducirFunkLoop();
+      setTiempoMusica(prev => prev + 2);
+    }, 2000);
     return () => clearInterval(interval);
-  }, [currentGame]);
+  }, [currentGame, musicaActiva]);
+
+  useEffect(() => {
+    if (tiempoMusica >= 180) {
+      setTiempoMusica(0);
+    }
+  }, [tiempoMusica]);
 
   if (currentGame === "hangman") {
     return <HangmanGameWrapper onBack={() => setCurrentGame(null)} />;
@@ -59,6 +71,10 @@ export default function GameHub() {
   
   if (currentGame === "tiragol") {
     return <Tiragol onBack={() => setCurrentGame(null)} />;
+  }
+
+  if (currentGame === "noledes") {
+    return <NoLeDesOPegale onBack={() => setCurrentGame(null)} />;
   }
 
   if (currentGame === "airhockey") {
@@ -143,6 +159,12 @@ export default function GameHub() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-12 p-6 text-center bg-gradient-to-br from-yellow-500 via-blue-500 to-red-500 relative">
+      <button 
+        onClick={() => setMusicaActiva(!musicaActiva)}
+        className="absolute top-6 left-6 bg-black/40 hover:bg-black/60 text-white px-4 py-2 rounded-full text-sm font-bold transition-all backdrop-blur-sm border border-white/20"
+      >
+        {musicaActiva ? "Apagar música" : "Encender música"}
+      </button>
       <div className="absolute bottom-4 right-6 text-white/60 text-sm font-medium italic">
         por: ernesto pinzon
       </div>
@@ -154,44 +176,58 @@ export default function GameHub() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-         <button
-           onClick={() => handleGameSelect("hangman")}
-           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-         >
-          <div className="relative z-10">
-            <h3 className="text-2xl font-bold text-white">El Ahorcado</h3>
-            <p className="mt-2 text-sm text-zinc-400">Adivina la palabra antes de que el muñeco caiga en la lava.</p>
-          </div>
-          <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-            😵
-          </div>
-        </button>
+          <button
+            onClick={() => handleGameSelect("hangman")}
+            className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+          >
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-white">El Ahorcado</h3>
+              <p className="mt-2 text-sm text-zinc-400">Adivina la palabra antes de que el muñeco caiga en la lava.</p>
+            </div>
+            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
+              😵
+            </div>
+          </button>
+ 
+          <button
+            onClick={() => handleGameSelect("tiragol")}
+            className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+          >
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-white">Tiragol</h3>
+              <p className="mt-2 text-sm text-zinc-400">¡Lanza el balón y marca el mejor récord de goles!</p>
+            </div>
+            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
+              ⚽
+            </div>
+          </button>
 
-         <button
-           onClick={() => handleGameSelect("tiragol")}
-           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-         >
-          <div className="relative z-10">
-            <h3 className="text-2xl font-bold text-white">Tiragol</h3>
-            <p className="mt-2 text-sm text-zinc-400">¡Lanza el balón y marca el mejor récord de goles!</p>
-          </div>
-          <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-            ⚽
-          </div>
-        </button>
+          <button
+            onClick={() => handleGameSelect("noledes")}
+            className="group relative overflow-hidden rounded-2xl border border-red-800 bg-zinc-900 p-8 transition-all hover:border-red-500 hover:bg-zinc-800"
+          >
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-white">No Le Des o Pegale</h3>
+              <p className="mt-2 text-sm text-zinc-400">¡Rápido! Pégale a los muñecos antes de que se escondan.</p>
+            </div>
+            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
+              🔨
+            </div>
+          </button>
+ 
+          <button
+            onClick={() => handleGameSelect("airhockey")}
+            className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+          >
+            <div className="relative z-10">
+              <h3 className="text-2xl font-bold text-white">Hockey de Aire</h3>
+              <p className="mt-2 text-sm text-zinc-400">Desliza el disco y vence a la IA o a un amigo.</p>
+            </div>
+            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
+              🏒
+            </div>
+          </button>
 
-         <button
-           onClick={() => handleGameSelect("airhockey")}
-           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-         >
-          <div className="relative z-10">
-            <h3 className="text-2xl font-bold text-white">Hockey de Aire</h3>
-            <p className="mt-2 text-sm text-zinc-400">Desliza el disco y vence a la IA o a un amigo.</p>
-          </div>
-          <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-            🏒
-          </div>
-        </button>
 
          <button
            onClick={() => handleGameSelect("botecolor")}

@@ -241,10 +241,14 @@ export function reproducirRisa() {
   if (!ctx) return;
   const t0 = ctx.currentTime;
 
+  // Aleatoriamente decide si es funk normal o "parodia funk" (estilo más caótico/agudo)
+  const esParodia = Math.random() > 0.5;
+  const factorTono = esParodia ? 1.5 : 1.0;
+
   const bajo = ctx.createOscillator();
   const bajoGain = ctx.createGain();
   bajo.type = "square";
-  bajo.frequency.setValueAtTime(55, t0);
+  bajo.frequency.setValueAtTime(55 * factorTono, t0);
   bajoGain.gain.setValueAtTime(0, t0);
   
   const ritmo = [0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75];
@@ -258,16 +262,16 @@ export function reproducirRisa() {
   bajo.stop(t0 + 2);
 
   const notasFunk = [
-    { f: 440, t: 0.1, d: 0.1 },
-    { f: 523, t: 0.3, d: 0.1 },
-    { f: 587, t: 0.5, d: 0.1 },
-    { f: 659, t: 0.7, d: 0.2 },
+    { f: 440 * factorTono, t: 0.1, d: 0.1 },
+    { f: 523 * factorTono, t: 0.3, d: 0.1 },
+    { f: 587 * factorTono, t: 0.5, d: 0.1 },
+    { f: 659 * factorTono, t: 0.7, d: 0.2 },
   ];
 
   notasFunk.forEach(n => {
     const osc = ctx.createOscillator();
     const g = ctx.createGain();
-    osc.type = "sawtooth";
+    osc.type = esParodia ? "sawtooth" : "sine";
     osc.frequency.setValueAtTime(n.f, t0 + n.t);
     g.gain.setValueAtTime(0, t0 + n.t);
     g.gain.linearRampToValueAtTime(0.08, t0 + n.t + 0.01);
