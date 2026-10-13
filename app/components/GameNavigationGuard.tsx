@@ -31,13 +31,16 @@ export default function GameNavigationGuard({
   const router = useRouter();
   const pathname = usePathname();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const [pendingBack, setPendingBack] = useState(false);
   const allowUnload = useRef(false);
+  const allowBack = useRef(false);
   const inGame = pathname ? isGameRoute(pathname) : false;
 
   const requestNavigation = useCallback(
     (href: string) => {
       const destination = new URL(href, window.location.href);
       if (shouldConfirmGameExit(pathname ?? "", destination.pathname)) {
+        setPendingBack(false);
         setPendingHref(
           destination.origin === window.location.origin
             ? `${destination.pathname}${destination.search}${destination.hash}`
@@ -57,7 +60,8 @@ export default function GameNavigationGuard({
   useEffect(() => {
     if (!inGame || !pathname) return;
 
-    let restoringHistory = false;
+    const gameUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    const gameHistoryState = window.history.state;
     const interceptLink = (event: MouseEvent) => {
       if (
         event.defaultPrevented ||
@@ -84,6 +88,7 @@ export default function GameNavigationGuard({
 
       event.preventDefault();
       event.stopImmediatePropagation();
+      setPendingBack(false);
       setPendingHref(
         destination.origin === window.location.origin
           ? `${destination.pathname}${destination.search}${destination.hash}`
@@ -92,8 +97,8 @@ export default function GameNavigationGuard({
     };
 
     const interceptHistory = (event: PopStateEvent) => {
-      if (restoringHistory) {
-        restoringHistory = false;
+      if (allowBack.current) {
+        allowBack.current = false;
         return;
       }
       const destination = new URL(window.location.href);
@@ -104,8 +109,8 @@ export default function GameNavigationGuard({
       if (!shouldConfirmGameExit(pathname, destinationPath)) return;
 
       event.stopImmediatePropagation();
-      restoringHistory = true;
-      window.history.go(1);
+      window.history.pushState(gameHistoryState, "", gameUrl);
+      setPendingBack(true);
       setPendingHref(
         destination.origin === window.location.origin
           ? `${destination.pathname}${destination.search}${destination.hash}`
@@ -131,8 +136,16 @@ export default function GameNavigationGuard({
 
   const confirmNavigation = () => {
     if (!pendingHref) return;
+    if (pendingBack) {
+      setPendingHref(null);
+      setPendingBack(false);
+      allowBack.current = true;
+      window.history.back();
+      return;
+    }
     const destination = new URL(pendingHref, window.location.href);
     setPendingHref(null);
+    setPendingBack(false);
     if (destination.origin === window.location.origin) {
       router.replace(
         `${destination.pathname}${destination.search}${destination.hash}`,
@@ -150,7 +163,10 @@ export default function GameNavigationGuard({
         open={pendingHref !== null}
         disablePointerDismissal
         onOpenChange={(open) => {
-          if (!open) setPendingHref(null);
+          if (!open) {
+            setPendingHref(null);
+            setPendingBack(false);
+          }
         }}
       >
         <Dialog.Portal>
