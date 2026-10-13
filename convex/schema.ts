@@ -11,6 +11,7 @@ export default defineSchema({
     blockedUntil: v.optional(v.number()),
     coins: v.optional(v.number()),
     avatar: v.optional(v.string()),
+    ownedAvatars: v.optional(v.array(v.string())),
     name: v.string(),
     country: v.string(),
     maxCoins: v.number(),

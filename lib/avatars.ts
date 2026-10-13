@@ -14,6 +14,7 @@ export const avatars = [
     tier: "mythic",
   },
   { id: "avatar-67", name: "67 Phantom", price: 67000, tier: "mythic" },
+  { id: "ronaldo-7", name: "Ronaldo 7", price: 75000, tier: "mythic" },
 ];
 const legacyAvatarIds: Record<string, string> = {
   "😊": "starter-fox",

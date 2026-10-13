@@ -116,7 +116,9 @@ export const registerAccount = internalMutation({
         ...fields,
         coins: legacy.coins,
         maxCoins: Math.max(guest.maxCoins, legacy.coins, legacy.maxCoins),
-        ...(legacy.avatar ? { avatar: legacy.avatar } : {}),
+        ...(legacy.avatar
+          ? { avatar: legacy.avatar, ownedAvatars: [legacy.avatar] }
+          : {}),
       });
       playerId = guest._id;
     } else {
@@ -178,11 +180,16 @@ export const me = query({
       coins: v.number(),
       maxCoins: v.number(),
       avatar: v.union(v.string(), v.null()),
+      ownedAvatars: v.array(v.string()),
     }),
   ),
   handler: async (ctx, { sessionToken }) => {
     const session = await currentSession(ctx, sessionToken);
     const player = session ? await ctx.db.get(session.playerId) : null;
+    const ownedIds = new Set([
+      ...(player?.ownedAvatars ?? []),
+      ...(player?.avatar ? [player.avatar] : []),
+    ]);
     return player
       ? {
           _id: player._id,
@@ -191,6 +198,9 @@ export const me = query({
           coins: player.coins ?? 0,
           maxCoins: player.maxCoins,
           avatar: player.avatar ?? null,
+          ownedAvatars: avatars
+            .filter((choice) => ownedIds.has(choice.id))
+            .map((choice) => choice.id),
         }
       : null;
   },
@@ -230,11 +240,26 @@ export const purchaseAvatar = mutation({
     const player = await currentPlayer(ctx, sessionToken);
     const choice = avatars.find((a) => a.id === avatar);
     if (!choice) throw new ConvexError("Avatar inválido.");
-    if (player.avatar === avatar) return null;
+    const ownedAvatars = [
+      ...new Set([
+        ...(player.ownedAvatars ?? []),
+        ...(player.avatar ? [player.avatar] : []),
+      ]),
+    ].filter((id) => avatars.some((owned) => owned.id === id));
+    if (ownedAvatars.includes(avatar)) {
+      if (player.avatar !== avatar || !player.ownedAvatars?.includes(avatar)) {
+        await ctx.db.patch(player._id, { avatar, ownedAvatars });
+      }
+      return null;
+    }
     const coins = player.coins ?? 0;
     if (coins < choice.price)
       throw new ConvexError("No tienes suficientes monedas.");
-    await ctx.db.patch(player._id, { avatar, coins: coins - choice.price });
+    await ctx.db.patch(player._id, {
+      avatar,
+      coins: coins - choice.price,
+      ownedAvatars: [...ownedAvatars, avatar],
+    });
     return null;
   },
 });

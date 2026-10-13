@@ -20,9 +20,11 @@ import {
 
 export function GameHubShell({
   startInStore = false,
+  startInProfile = false,
   initialGame,
 }: {
   startInStore?: boolean;
+  startInProfile?: boolean;
   initialGame?: GameRouteId;
 }) {
   const hasHydrated = useSyncExternalStore(
@@ -100,14 +102,16 @@ export function GameHubShell({
         </p>
       )}
       <GameHub
-        key={`${profile._id}:${initialGame ?? (startInStore ? "store" : "home")}`}
+        key={`${profile._id}:${initialGame ?? (startInProfile ? "profile" : startInStore ? "store" : "home")}`}
         name={profile.name}
         country={profile.country}
         initialAvatar={profile.avatar}
         initialCoins={profile.coins}
         maxCoins={profile.maxCoins}
+        ownedAvatars={profile.ownedAvatars}
         initialGame={initialGame}
         startInStore={startInStore}
+        startInProfile={startInProfile}
         onPurchase={async (avatar) => {
           await purchaseAvatar({ sessionToken, avatar });
         }}

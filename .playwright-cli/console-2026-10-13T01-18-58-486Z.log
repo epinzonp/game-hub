@@ -747,3 +747,14 @@ Fast Refresh requires at least one parent function component in your React tree.
 [50093062ms] [LOG] [Fast Refresh] done in 288ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
 [50367670ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
 [50371237ms] [LOG] [Fast Refresh] done in 3668ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58343435ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58345366ms] [LOG] [Fast Refresh] done in 1992ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58345526ms] [LOG] [Fast Refresh] done in 1992ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58345727ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58347063ms] [LOG] [Fast Refresh] done in 1433ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58347131ms] [LOG] [Fast Refresh] done in 1433ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58347241ms] [LOG] [Fast Refresh] done in 1433ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58351362ms] [LOG] [Fast Refresh] done in 1433ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58357095ms] [LOG] [Fast Refresh] done in 1433ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58358879ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776
+[58358879ms] [LOG] [Fast Refresh] done in 103ms @ http://localhost:3000/_next/static/chunks/0lzl_next_dist_0mleu9i._.js:776

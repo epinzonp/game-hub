@@ -1,10 +1,27 @@
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { convexTest } from "convex-test";
 import { expect, test } from "vitest";
 import schema from "../convex/schema";
 import { api } from "../convex/_generated/api";
+import { avatars } from "../lib/avatars";
 
 const modules = import.meta.glob("../convex/**/*.ts");
 const profile = { name: "Ana", country: "Colombia", pin: "4826" };
+
+test("Ronaldo 7 is available as a premium 75,000-coin avatar", () => {
+  expect(avatars.find((avatar) => avatar.id === "ronaldo-7")).toMatchObject({
+    name: "Ronaldo 7",
+    price: 75000,
+  });
+  expect(
+    existsSync(
+      fileURLToPath(
+        new URL("../public/avatars/ronaldo-7.webp", import.meta.url),
+      ),
+    ),
+  ).toBe(true);
+});
 
 async function account(t: ReturnType<typeof convexTest>, name = "Ana") {
   return {
@@ -88,10 +105,42 @@ test("imports a guest record once, preserving its maximum and avatar", async () 
   };
   expect((await t.query(api.players.me, ana))?.coins).toBe(500);
   expect((await t.query(api.players.me, ana))?.avatar).toBe("neon-raccoon");
+  expect((await t.query(api.players.me, ana))?.ownedAvatars).toEqual([
+    "neon-raccoon",
+  ]);
+  await t.mutation(api.players.purchaseAvatar, {
+    ...ana,
+    avatar: "starter-fox",
+  });
+  expect((await t.query(api.players.me, ana))?.coins).toBe(500);
+  expect((await t.query(api.players.me, ana))?.avatar).toBe("starter-fox");
   expect(await t.query(api.leaderboard.list, {})).toHaveLength(1);
   await expect(
     t.action(api.accounts.register, { ...profile, name: "Luis", legacy }),
   ).rejects.toThrow("ya se transfirió");
+});
+
+test("treats a legacy current avatar as owned and equips other owned avatars free", async () => {
+  const t = convexTest(schema, modules);
+  const ana = await account(t);
+  await t.run(async (ctx) => {
+    const player = await ctx.db.query("coinRecords").first();
+    if (!player) throw new Error("Missing player");
+    await ctx.db.patch(player._id, { coins: 500, avatar: "neon-raccoon" });
+  });
+
+  expect((await t.query(api.players.me, ana))?.ownedAvatars).toEqual([
+    "neon-raccoon",
+  ]);
+  await t.mutation(api.players.purchaseAvatar, {
+    ...ana,
+    avatar: "starter-fox",
+  });
+  expect(await t.query(api.players.me, ana)).toMatchObject({
+    coins: 500,
+    avatar: "starter-fox",
+    ownedAvatars: ["starter-fox", "neon-raccoon"],
+  });
 });
 
 test("purchases use server prices, concurrent rewards add up, and spending preserves the maximum", async () => {
@@ -110,15 +159,27 @@ test("purchases use server prices, concurrent rewards add up, and spending prese
     ...ana,
     avatar: "neon-raccoon",
   });
+  await t.mutation(api.players.purchaseAvatar, {
+    ...ana,
+    avatar: "starter-fox",
+  });
+  await t.mutation(api.players.purchaseAvatar, {
+    ...ana,
+    avatar: "neon-raccoon",
+  });
   const saved = await t.query(api.players.me, ana);
   expect(saved?.coins).toBe(100);
   expect(saved?.maxCoins).toBe(600);
   expect(saved?.avatar).toBe("neon-raccoon");
+  expect(saved?.ownedAvatars).toEqual(["starter-fox", "neon-raccoon"]);
   await expect(
     t.mutation(api.players.purchaseAvatar, { ...ana, avatar: "astro-cat" }),
   ).rejects.toThrow("No tienes suficientes");
   await expect(
     t.mutation(api.players.purchaseAvatar, { ...ana, avatar: "fake" }),
   ).rejects.toThrow("Avatar inválido");
+  await expect(
+    t.mutation(api.players.purchaseAvatar, { ...ana, avatar: "ronaldo-7" }),
+  ).rejects.toThrow("No tienes suficientes");
   expect(await t.query(api.players.me, ana)).toEqual(saved);
 });

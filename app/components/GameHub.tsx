@@ -36,7 +36,7 @@ import Radiotricky from "./Radiotricky";
 import PinPon from "./PinPon";
 import NoLeDesOPegale from "./NoLeDesOPegale";
 
-type GameId = GameRouteId | "friends" | "store" | null;
+type GameId = GameRouteId | "friends" | "store" | "profile" | null;
 
 export const games = [
   {
@@ -221,6 +221,12 @@ function AccountMenu({
           </div>
         </dl>
         <div className="border-t border-white/10 p-2">
+          <Link
+            href="/profile"
+            className="flex min-h-11 w-full items-center rounded-xl px-3 text-sm font-bold text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-[#fff34b]"
+          >
+            Mi perfil
+          </Link>
           <button
             type="button"
             onClick={onSignOut}
@@ -241,34 +247,69 @@ export default function GameHub({
   initialAvatar,
   initialCoins,
   maxCoins,
+  ownedAvatars,
   initialGame,
   onSignOut,
   onPurchase,
   onWin,
   startInStore = false,
+  startInProfile = false,
 }: {
   name: string;
   country: string;
   initialAvatar: string | null;
   initialCoins: number;
   maxCoins: number;
+  ownedAvatars: string[];
   initialGame?: GameRouteId;
   onSignOut: () => void;
   onPurchase: (avatar: string) => Promise<void>;
   onWin: () => Promise<void>;
   startInStore?: boolean;
+  startInProfile?: boolean;
 }) {
   const router = useRouter();
   const requestNavigation = useGameNavigation();
   const [currentGame, setCurrentGame] = useState<GameId>(
-    !initialAvatar ? "store" : (initialGame ?? (startInStore ? "store" : null)),
+    initialGame ??
+      (startInProfile
+        ? "profile"
+        : !initialAvatar
+          ? "store"
+          : startInStore
+            ? "store"
+            : null),
   );
   const [musicaActiva, setMusicaActiva] = useState(false);
   const coins = initialCoins;
   const selectedCube = normalizeAvatarId(initialAvatar);
+  const ownedAvatarIds = new Set(ownedAvatars);
   const [purchasePending, setPurchasePending] = useState(false);
   const [purchaseError, setPurchaseError] = useState("");
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
+
+  const selectAvatar = async (avatarId: string) => {
+    const avatar = avatarById[avatarId as keyof typeof avatarById];
+    if (!avatar || purchasePending) return;
+    if (!ownedAvatarIds.has(avatar.id) && coins < avatar.price) {
+      alert("No tienes suficientes monedas");
+      return;
+    }
+    setPurchasePending(true);
+    setPurchaseError("");
+    try {
+      await onPurchase(avatar.id);
+      setPreviewAvatar(null);
+    } catch (error) {
+      setPurchaseError(
+        error instanceof ConvexError && typeof error.data === "string"
+          ? error.data
+          : "No pudimos guardar tu avatar. Inténtalo de nuevo.",
+      );
+    } finally {
+      setPurchasePending(false);
+    }
+  };
 
   const handleGameSelect = (game: GameId) => {
     if (game === "store") {
@@ -366,29 +407,6 @@ export default function GameHub({
   }
 
   if (currentGame === "store") {
-    const buyAvatar = async (avatarId: string) => {
-      const avatar = avatarById[avatarId as keyof typeof avatarById];
-      if (!avatar || purchasePending) return;
-      if (coins < avatar.price) {
-        alert("No tienes suficientes monedas");
-        return;
-      }
-      setPurchasePending(true);
-      setPurchaseError("");
-      try {
-        await onPurchase(avatar.id);
-        setPreviewAvatar(null);
-      } catch (error) {
-        setPurchaseError(
-          error instanceof ConvexError && typeof error.data === "string"
-            ? error.data
-            : "No pudimos guardar tu avatar. Inténtalo de nuevo.",
-        );
-      } finally {
-        setPurchasePending(false);
-      }
-    };
-
     return (
       <div className="min-h-screen w-full bg-[#170d12] text-white">
         <header className="flex min-h-20 items-center justify-between border-b border-white/10 bg-[#241318] px-5 sm:px-10">
@@ -492,7 +510,9 @@ export default function GameHub({
                     className={`group relative flex min-h-48 flex-col items-start justify-between overflow-hidden rounded-2xl bg-[#28161c] p-4 text-left transition duration-200 hover:-translate-y-1 hover:bg-[#382027] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] sm:min-h-56 sm:p-5 ${selected ? "ring-2 ring-[#fff34b]" : ""}`}
                   >
                     <span className="absolute right-4 top-4 rounded-full bg-black/30 px-2.5 py-1 text-xs font-bold tabular-nums text-[#fff34b]">
-                      {avatar.price === 0 ? (
+                      {ownedAvatarIds.has(avatar.id) ? (
+                        "Lo tienes"
+                      ) : avatar.price === 0 ? (
                         "Gratis"
                       ) : (
                         <span className="inline-flex items-center gap-1">
@@ -585,7 +605,7 @@ export default function GameHub({
                 </div>
                 <button
                   type="button"
-                  onClick={() => buyAvatar(previewAvatar)}
+                  onClick={() => void selectAvatar(previewAvatar)}
                   disabled={purchasePending || selectedCube === previewAvatar}
                   className="min-h-12 w-full rounded-xl bg-[#fff34b] px-5 font-black text-[#180e13] transition hover:bg-[#fff877] disabled:cursor-default disabled:opacity-60"
                 >
@@ -593,10 +613,12 @@ export default function GameHub({
                     ? "Guardando…"
                     : selectedCube === previewAvatar
                       ? "Avatar seleccionado"
-                      : avatarById[previewAvatar as keyof typeof avatarById]
-                            .price === 0
-                        ? "Elegir gratis"
-                        : `Comprar por ${avatarById[previewAvatar as keyof typeof avatarById].price.toLocaleString("es-CO")} monedas`}
+                      : ownedAvatarIds.has(previewAvatar)
+                        ? "Usar avatar"
+                        : avatarById[previewAvatar as keyof typeof avatarById]
+                              .price === 0
+                          ? "Elegir gratis"
+                          : `Comprar por ${avatarById[previewAvatar as keyof typeof avatarById].price.toLocaleString("es-CO")} monedas`}
                 </button>
                 {purchaseError && (
                   <p role="alert" className="mt-3 text-sm text-rose-200">
@@ -606,6 +628,136 @@ export default function GameHub({
               </div>
             </div>
           )}
+      </div>
+    );
+  }
+
+  if (currentGame === "profile") {
+    return (
+      <div className="min-h-screen w-full bg-[#180e13] text-white">
+        <header className="flex min-h-20 items-center justify-between border-b border-white/10 bg-[#241519] px-5 sm:px-10">
+          <Link
+            href="/"
+            className="inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b]"
+          >
+            <ArrowRight className="size-4 rotate-180" aria-hidden="true" />
+            Volver al hub
+          </Link>
+          <div className="flex items-center gap-3">
+            <AccountMenu
+              name={name}
+              country={country}
+              avatar={selectedCube}
+              coins={coins}
+              maxCoins={maxCoins}
+              onSignOut={onSignOut}
+            />
+          </div>
+        </header>
+        <main className="mx-auto max-w-6xl px-5 py-10 sm:px-10 sm:py-14">
+          <section className="mb-10 flex flex-wrap items-center gap-5 rounded-3xl border border-white/10 bg-[#241519] p-6 sm:p-8">
+            <span className="grid size-24 shrink-0 place-items-center overflow-hidden rounded-2xl border border-[#fff34b]/45 bg-[#392126] text-3xl font-black text-[#fff34b]">
+              {selectedCube ? (
+                <AvatarPortrait
+                  id={selectedCube}
+                  size={96}
+                  className="size-full object-cover"
+                />
+              ) : (
+                nameInitials(name)
+              )}
+            </span>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-3xl font-black tracking-tight sm:text-4xl">
+                {name}
+              </h1>
+              <p className="mt-1 text-rose-100/65">{country}</p>
+            </div>
+            <dl className="grid min-w-52 gap-3 rounded-2xl bg-[#180e13] px-5 py-4 text-sm">
+              <div className="flex items-center justify-between gap-5">
+                <dt className="text-rose-100/65">Monedas actuales</dt>
+                <dd className="font-extrabold tabular-nums text-[#fff34b]">
+                  {coins.toLocaleString("es-CO")}
+                </dd>
+              </div>
+              <div className="flex items-center justify-between gap-5">
+                <dt className="text-rose-100/65">Máximo alcanzado</dt>
+                <dd className="font-extrabold tabular-nums text-[#fff34b]">
+                  {maxCoins.toLocaleString("es-CO")}
+                </dd>
+              </div>
+            </dl>
+          </section>
+
+          <section aria-labelledby="owned-avatars-heading">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h2
+                  id="owned-avatars-heading"
+                  className="text-2xl font-black sm:text-3xl"
+                >
+                  Tus avatares
+                </h2>
+                <p className="mt-2 text-sm text-rose-100/65">
+                  Cambia de avatar cuando quieras. Los que ya tienes son gratis.
+                </p>
+              </div>
+              <Link
+                href="/store"
+                className="inline-flex min-h-11 items-center rounded-xl bg-[#fff34b] px-5 text-sm font-black text-[#180e13] transition hover:bg-[#fff877] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                Visitar la tienda
+              </Link>
+            </div>
+
+            {ownedAvatars.length ? (
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {avatars
+                  .filter((avatar) => ownedAvatarIds.has(avatar.id))
+                  .map((avatar) => {
+                    const selected = selectedCube === avatar.id;
+                    return (
+                      <article
+                        key={avatar.id}
+                        className={`rounded-2xl border bg-[#241519] p-4 ${selected ? "border-[#fff34b]" : "border-white/10"}`}
+                      >
+                        <div
+                          className={`avatar-tier-${avatar.tier} ${avatar.id === "avatar-67" ? "avatar-ultimate" : ""} mx-auto grid aspect-square w-full max-w-48 place-items-center overflow-hidden rounded-2xl bg-[#392126]`}
+                        >
+                          <AvatarPortrait
+                            id={avatar.id}
+                            size={192}
+                            className="avatar-portrait size-full object-cover"
+                          />
+                        </div>
+                        <h3 className="mt-4 text-center text-lg font-extrabold">
+                          {avatar.name}
+                        </h3>
+                        <button
+                          type="button"
+                          aria-pressed={selected}
+                          disabled={selected || purchasePending}
+                          onClick={() => void selectAvatar(avatar.id)}
+                          className="mt-3 min-h-11 w-full rounded-xl bg-[#fff34b] px-3 text-sm font-black text-[#180e13] transition hover:bg-[#fff877] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:cursor-default disabled:bg-white/10 disabled:text-white/65"
+                        >
+                          {selected ? "En uso" : "Usar avatar"}
+                        </button>
+                      </article>
+                    );
+                  })}
+              </div>
+            ) : (
+              <p className="rounded-2xl border border-white/10 bg-[#241519] p-6 text-rose-100/70">
+                Aún no tienes avatares. Visita la tienda para elegir el primero.
+              </p>
+            )}
+            {purchaseError && (
+              <p role="alert" className="mt-4 text-sm text-rose-200">
+                {purchaseError}
+              </p>
+            )}
+          </section>
+        </main>
       </div>
     );
   }
