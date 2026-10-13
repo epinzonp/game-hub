@@ -944,13 +944,13 @@ export default function GameHub({
             </h2>
           </div>
 
-          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:-mx-8 sm:gap-5 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 xl:grid-cols-4">
+          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:-mx-8 sm:gap-5 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:items-start lg:overflow-visible lg:px-0 xl:grid-cols-4">
             {games.map((game) => (
               <button
                 key={game.id}
                 type="button"
                 onClick={() => handleGameSelect(game.id)}
-                className="group w-[82vw] shrink-0 snap-start text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b] sm:w-[46vw] lg:w-auto"
+                className="group w-[82vw] shrink-0 snap-start self-start text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b] sm:w-[46vw] lg:w-auto"
               >
                 <span className="relative block aspect-[16/9] overflow-hidden rounded-[14px] bg-[#321a20]">
                   <Image
