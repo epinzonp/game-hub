@@ -1,9 +1,16 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import {
+  readCoinBalance,
+  saveCoinBalance,
+  subscribeToCoins,
+} from "@/lib/coins";
+import CoinLeaderboard from "./CoinLeaderboard";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -15,6 +22,7 @@ import {
   LogOut,
   Music2,
   ShoppingBag,
+  Trophy,
   UsersRound,
   Volume2,
   VolumeX,
@@ -102,11 +110,18 @@ const avatars = [
   { id: "magma-dragon", name: "Magma Dragon", price: 10000, tier: "legendary" },
   { id: "cosmic-wolf", name: "Cosmic Wolf", price: 15000, tier: "legendary" },
   { id: "aurora-koi", name: "Aurora Koi", price: 20000, tier: "mythic" },
-  { id: "celestial-knight", name: "Celestial Knight", price: 30000, tier: "mythic" },
+  {
+    id: "celestial-knight",
+    name: "Celestial Knight",
+    price: 30000,
+    tier: "mythic",
+  },
   { id: "avatar-67", name: "67 Phantom", price: 67000, tier: "mythic" },
 ];
 
-const avatarById = Object.fromEntries(avatars.map((avatar) => [avatar.id, avatar]));
+const avatarById = Object.fromEntries(
+  avatars.map((avatar) => [avatar.id, avatar]),
+);
 const legacyAvatarIds: Record<string, string> = {
   "😊": "starter-fox",
   "😢": "astro-cat",
@@ -175,11 +190,13 @@ function AccountMenu({
   return (
     <details className="group relative shrink-0">
       <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-full border border-white/10 bg-[#351e24] py-1 pl-1 pr-3 transition hover:border-white/25 hover:bg-[#40242c] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] [&::-webkit-details-marker]:hidden">
-        <span
-          className="grid size-9 place-items-center overflow-hidden rounded-full border border-[#fff34b]/45 bg-[#392126] text-xs font-black text-[#fff34b]"
-        >
+        <span className="grid size-9 place-items-center overflow-hidden rounded-full border border-[#fff34b]/45 bg-[#392126] text-xs font-black text-[#fff34b]">
           {avatar ? (
-            <AvatarPortrait id={avatar} size={36} className="size-full object-cover" />
+            <AvatarPortrait
+              id={avatar}
+              size={36}
+              className="size-full object-cover"
+            />
           ) : (
             nameInitials(name)
           )}
@@ -197,7 +214,11 @@ function AccountMenu({
         <div className="flex items-center gap-3 px-4 py-4">
           <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-xl border border-[#fff34b]/45 bg-[#392126] text-lg font-black text-[#fff34b]">
             {avatar ? (
-              <AvatarPortrait id={avatar} size={44} className="size-full object-cover" />
+              <AvatarPortrait
+                id={avatar}
+                size={44}
+                className="size-full object-cover"
+              />
             ) : (
               nameInitials(name)
             )}
@@ -243,7 +264,11 @@ export default function GameHub({
   );
   const [daysLeft, setDaysLeft] = useState(10);
   const [musicaActiva, setMusicaActiva] = useState(false);
-  const [coins, setCoins] = useState(initialCoins);
+  const coins = useSyncExternalStore(
+    subscribeToCoins,
+    readCoinBalance,
+    () => initialCoins,
+  );
   const [selectedCube, setSelectedCube] = useState<string | null>(
     normalizeAvatarId(initialAvatar),
   );
@@ -356,8 +381,7 @@ export default function GameHub({
       localStorage.setItem("user-cube", avatar.id);
       const nextCoins = avatar.price > 0 ? coins - avatar.price : coins;
       if (avatar.price > 0) {
-        localStorage.setItem("user-coins", nextCoins.toString());
-        setCoins(nextCoins);
+        saveCoinBalance(nextCoins);
       }
       setSelectedCube(avatar.id);
       setPreviewAvatar(null);
@@ -423,6 +447,7 @@ export default function GameHub({
             </div>
           </section>
 
+          <CoinLeaderboard />
           <section aria-labelledby="avatars-heading">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>
@@ -496,46 +521,55 @@ export default function GameHub({
             </div>
           </section>
         </main>
-        {previewAvatar && avatarById[previewAvatar as keyof typeof avatarById] && (
-          <div className="fixed inset-0 z-50 grid place-items-center bg-[#10090d]/80 p-4 backdrop-blur-sm">
-            <div
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="avatar-preview-title"
-              className="relative w-full max-w-md rounded-3xl border border-white/15 bg-[#241519] p-6 text-center shadow-2xl"
-            >
-              <button
-                type="button"
-                onClick={() => setPreviewAvatar(null)}
-                className="absolute right-4 top-4 rounded-full px-3 py-1 text-xl text-white/60 hover:bg-white/10 hover:text-white"
-                aria-label="Cerrar vista previa"
+        {previewAvatar &&
+          avatarById[previewAvatar as keyof typeof avatarById] && (
+            <div className="fixed inset-0 z-50 grid place-items-center bg-[#10090d]/80 p-4 backdrop-blur-sm">
+              <div
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="avatar-preview-title"
+                className="relative w-full max-w-md rounded-3xl border border-white/15 bg-[#241519] p-6 text-center shadow-2xl"
               >
-                ×
-              </button>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#fff34b]">
-                Vista previa
-              </p>
-              <h2 id="avatar-preview-title" className="mt-2 text-3xl font-black">
-                {avatarById[previewAvatar as keyof typeof avatarById].name}
-              </h2>
-              <div className="mx-auto my-5 grid size-64 place-items-center rounded-3xl bg-[#180e13] p-4">
-                <AvatarPortrait id={previewAvatar} size={240} className="size-full object-contain" />
+                <button
+                  type="button"
+                  onClick={() => setPreviewAvatar(null)}
+                  className="absolute right-4 top-4 rounded-full px-3 py-1 text-xl text-white/60 hover:bg-white/10 hover:text-white"
+                  aria-label="Cerrar vista previa"
+                >
+                  ×
+                </button>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-[#fff34b]">
+                  Vista previa
+                </p>
+                <h2
+                  id="avatar-preview-title"
+                  className="mt-2 text-3xl font-black"
+                >
+                  {avatarById[previewAvatar as keyof typeof avatarById].name}
+                </h2>
+                <div className="mx-auto my-5 grid size-64 place-items-center rounded-3xl bg-[#180e13] p-4">
+                  <AvatarPortrait
+                    id={previewAvatar}
+                    size={240}
+                    className="size-full object-contain"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => buyAvatar(previewAvatar)}
+                  disabled={selectedCube === previewAvatar}
+                  className="min-h-12 w-full rounded-xl bg-[#fff34b] px-5 font-black text-[#180e13] transition hover:bg-[#fff877] disabled:cursor-default disabled:opacity-60"
+                >
+                  {selectedCube === previewAvatar
+                    ? "Avatar seleccionado"
+                    : avatarById[previewAvatar as keyof typeof avatarById]
+                          .price === 0
+                      ? "Elegir gratis"
+                      : `Comprar por ${avatarById[previewAvatar as keyof typeof avatarById].price.toLocaleString("es-CO")} monedas`}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => buyAvatar(previewAvatar)}
-                disabled={selectedCube === previewAvatar}
-                className="min-h-12 w-full rounded-xl bg-[#fff34b] px-5 font-black text-[#180e13] transition hover:bg-[#fff877] disabled:cursor-default disabled:opacity-60"
-              >
-                {selectedCube === previewAvatar
-                  ? "Avatar seleccionado"
-                  : avatarById[previewAvatar as keyof typeof avatarById].price === 0
-                    ? "Elegir gratis"
-                    : `Comprar por ${avatarById[previewAvatar as keyof typeof avatarById].price.toLocaleString("es-CO")} monedas`}
-              </button>
             </div>
-          </div>
-        )}
+          )}
       </div>
     );
   }
@@ -545,7 +579,7 @@ export default function GameHub({
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#241519]">
         <nav
           aria-label="Navegación principal"
-          className="mx-auto flex min-h-[72px] max-w-[1600px] items-center gap-6 px-4 sm:px-8"
+          className="mx-auto flex min-h-[72px] max-w-[1600px] flex-wrap items-center gap-2 px-4 py-3 sm:gap-4 sm:px-8 xl:gap-6 2xl:flex-nowrap"
         >
           <a
             href="#inicio"
@@ -595,11 +629,19 @@ export default function GameHub({
           </div>
           <a
             href="#juegos"
-            className="ml-auto hidden h-11 max-w-[430px] flex-1 items-center gap-3 rounded-full border border-white/15 bg-white/[0.06] px-4 text-sm text-white/50 transition hover:border-white/30 hover:text-white/75 md:flex"
+            className="ml-auto hidden h-11 max-w-[430px] flex-1 items-center gap-3 rounded-full border border-white/15 bg-white/[0.06] px-4 text-sm text-white/50 transition hover:border-white/30 hover:text-white/75 2xl:flex"
           >
             <Gamepad2 className="size-[18px]" aria-hidden="true" />
             ¿A qué jugamos hoy?
           </a>
+          <Link
+            href="/leaderboard"
+            aria-label="Clasificación"
+            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-full border border-[#b695ff]/45 bg-[#291a32] px-3 text-sm font-bold text-[#d7bcff] transition hover:bg-[#372343] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b] lg:px-4"
+          >
+            <Trophy className="size-4" aria-hidden="true" />
+            <span className="hidden lg:inline">Clasificación</span>
+          </Link>
           <button
             onClick={() => handleGameSelect("friends")}
             className="hidden items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-sm font-bold transition hover:bg-white/15 sm:inline-flex"

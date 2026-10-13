@@ -1,6 +1,7 @@
 "use client";
 import GameHub from "@/app/components/GameHub";
 import UserProfileModal from "@/app/components/UserProfileModal";
+import CoinScoreSync from "@/app/components/CoinScoreSync";
 import { useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
 
@@ -41,15 +42,26 @@ function getSavedProfile(): string | null {
 }
 
 function subscribeToProfile(onChange: () => void) {
-  window.addEventListener("storage", onChange);
+  const onStorage = (event: StorageEvent) => {
+    if (event.key === "game-hub-guest-id" || event.key === null) {
+      window.location.reload();
+      return;
+    }
+    onChange();
+  };
+  window.addEventListener("storage", onStorage);
   window.addEventListener(profileChangeEvent, onChange);
   return () => {
-    window.removeEventListener("storage", onChange);
+    window.removeEventListener("storage", onStorage);
     window.removeEventListener(profileChangeEvent, onChange);
   };
 }
 
-export function GameHubShell({ startInStore = false }: { startInStore?: boolean }) {
+export function GameHubShell({
+  startInStore = false,
+}: {
+  startInStore?: boolean;
+}) {
   const router = useRouter();
   const savedProfile = useSyncExternalStore(
     subscribeToProfile,
@@ -80,25 +92,33 @@ export function GameHubShell({ startInStore = false }: { startInStore?: boolean 
 
   const handleSignOut = () => {
     localStorage.removeItem(profileKey);
-    window.dispatchEvent(new Event(profileChangeEvent));
+    localStorage.removeItem("game-hub-guest-id");
+    localStorage.removeItem("user-coin-record");
+    window.location.reload();
   };
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-zinc-950 text-zinc-50">
-      {isReady && (profile ? (
-        <GameHub
-          name={profile.name}
-          country={profile.country}
-          initialAvatar={avatar}
-          initialCoins={coins}
-          onSignOut={handleSignOut}
-          startInStore={startInStore}
-        />
-      ) : (
-        <main className="min-h-screen">
-          <UserProfileModal onSave={handleSaveProfile} />
-        </main>
-      ))}
+      {isReady &&
+        (profile ? (
+          <>
+            {process.env.NEXT_PUBLIC_CONVEX_URL && (
+              <CoinScoreSync name={profile.name} country={profile.country} />
+            )}
+            <GameHub
+              name={profile.name}
+              country={profile.country}
+              initialAvatar={avatar}
+              initialCoins={coins}
+              onSignOut={handleSignOut}
+              startInStore={startInStore}
+            />
+          </>
+        ) : (
+          <main className="min-h-screen">
+            <UserProfileModal onSave={handleSaveProfile} />
+          </main>
+        ))}
     </div>
   );
 }

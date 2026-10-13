@@ -18,6 +18,7 @@ Game Hub brings a collection of casual games together so visitors can choose a g
 
 - The hub includes solo and multiplayer game experiences, a friends entry, and a local avatar shop.
 - The shop uses locally stored coins and avatar choices; preserve its existing selection and purchase behavior.
+- `/leaderboard` shows the live top ten coin records with a podium and ranking rows. The landing header links to it, and the shop keeps its compact board. Spending coins never lowers a record. Players are guests identified in this browser; clearing browser data creates a new identity, and balances are client-reported.
 - This redesign changes the landing page, game thumbnails, and shop presentation. Existing game experiences remain unchanged.
 
 ## Brand Commitments
