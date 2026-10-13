@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
+import GameEntryScreen from "./GameEntryScreen";
 
 type GameState = "menu" | "difficulty" | "playing" | "result";
 type Opponent = "AI" | "Player";
 type Difficulty = "easy" | "medium" | "hard" | "impossible";
 
-export default function AirHockey({ onBack }: { onBack: () => void }) {
+export default function AirHockey() {
   const [state, setState] = useState<GameState>("menu");
   const [opponent, setOpponent] = useState<Opponent>("AI");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
@@ -183,29 +184,37 @@ export default function AirHockey({ onBack }: { onBack: () => void }) {
 
   if (state === "menu") {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-zinc-900 text-white">
-        <h1 className="text-6xl font-black italic">HOCKEY <span className="text-blue-500">AIRE</span></h1>
-        <div className="flex gap-4">
-          <button onClick={() => { setOpponent("AI"); setState("difficulty"); }} className="rounded-xl bg-blue-600 px-6 py-3 font-bold hover:bg-blue-500">Contra IA</button>
-          <button onClick={() => { setOpponent("Player"); setState("playing"); }} className="rounded-xl bg-zinc-700 px-6 py-3 font-bold hover:bg-zinc-600">Contra Jugador</button>
-        </div >
-        <button onClick={onBack} className="text-zinc-500 underline">Volver al Hub</button>
-      </div>
+      <GameEntryScreen
+        title="Hockey de Aire"
+        description="Desliza el disco y vence a la IA o a un amigo."
+        image="/game-covers/cover-3.webp"
+      >
+        <h2 className="text-xl font-extrabold">Elige rival</h2>
+        <div className="grid gap-3">
+          <button onClick={() => { setOpponent("AI"); setState("difficulty"); }} className="min-h-12 rounded-xl bg-[#fff34b] px-6 py-3 font-black text-[#180e13] transition hover:bg-[#fff877] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">Contra IA</button>
+          <button onClick={() => { setOpponent("Player"); setState("playing"); }} className="min-h-12 rounded-xl border border-white/15 bg-[#392126] px-6 py-3 font-bold text-white transition hover:bg-[#4a2932] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b]">Contra Jugador</button>
+        </div>
+      </GameEntryScreen>
     );
   }
 
   if (state === "difficulty") {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-zinc-900 text-white">
-        <h2 className="text-4xl font-black mb-4">Selecciona Dificultad</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <button onClick={() => { setDifficulty("easy"); setState("playing"); }} className="rounded-xl bg-green-600 px-6 py-3 font-bold hover:bg-green-500">Fácil</button>
-          <button onClick={() => { setDifficulty("medium"); setState("playing"); }} className="rounded-xl bg-yellow-600 px-6 py-3 font-bold hover:bg-yellow-500">Medio</button>
-          <button onClick={() => { setDifficulty("hard"); setState("playing"); }} className="rounded-xl bg-orange-600 px-6 py-3 font-bold hover:bg-orange-500">Difícil</button>
-          <button onClick={() => { setDifficulty("impossible"); setState("playing"); }} className="rounded-xl bg-red-600 px-6 py-3 font-bold hover:bg-red-500">Imposible</button>
-        </div >
-        <button onClick={() => setState("menu")} className="text-zinc-500 underline">Volver</button>
-      </div>
+      <GameEntryScreen
+        title="Hockey de Aire"
+        description="Elige qué tan intenso quieres que sea el partido."
+        image="/game-covers/cover-3.webp"
+      >
+        <h2 className="text-xl font-extrabold">Selecciona dificultad</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {([["easy", "Fácil"], ["medium", "Medio"], ["hard", "Difícil"], ["impossible", "Imposible"]] as const).map(([level, label]) => (
+            <button key={level} onClick={() => { setDifficulty(level); setState("playing"); }} className="min-h-12 rounded-xl border border-white/10 bg-[#392126] px-4 py-3 font-bold text-white transition hover:border-[#fff34b]/60 hover:bg-[#4a2932] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b]">
+              {label}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => setState("menu")} className="self-start text-sm font-bold text-rose-100/70 underline underline-offset-4 hover:text-white">Volver a elegir rival</button>
+      </GameEntryScreen>
     );
   }
 
@@ -215,7 +224,6 @@ export default function AirHockey({ onBack }: { onBack: () => void }) {
         <h2 className="text-5xl font-black">¡{winner === "Player" ? "GANASTE!" : "PERDISTE!"}</h2>
         <div className="text-2xl">Final: {score.player} - {score.enemy}</div>
         <button onClick={() => { setWinner(null); setScore({ player: 0, enemy: 0 }); setState("menu"); }} className="rounded-xl bg-blue-600 px-8 py-3 font-bold">Jugar de nuevo</button>
-        <button onClick={onBack} className="text-zinc-500 underline">Volver al Hub</button>
       </div>
     );
   }
@@ -269,7 +277,6 @@ export default function AirHockey({ onBack }: { onBack: () => void }) {
           }} 
         />
       </div >
-      <button onClick={onBack} className="text-zinc-500 underline mt-4">Volver al Hub</button>
     </div>
   );
 }

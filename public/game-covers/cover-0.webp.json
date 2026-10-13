@@ -1,0 +1,7 @@
+{
+  "prompt": "Edit target: the attached El Ahorcado game artwork. Produce one high-detail landscape image in EXACT 3:2 aspect ratio, 1536 x 1024 pixels or larger, not 16:9. Extend the scene vertically so a tall entry-screen crop keeps crisp native detail. Make the mood a little spooky for a kids-and-family game: haunted castle at purple dusk, drifting fog, deep burgundy shadows, eerie moon rim light, restrained golden lava glow. Keep the original folded-paper hero, but give it a nervous expression. Keep the wooden gallows as a clear central visual cue and replace the dangling word board with an empty rope loop. The paper hero stands safely on the rocky ledge, alive and unharmed. Preserve the polished original 3D game-art style and recognizable setting. Atmospheric suspense, no gore, no injured people, no bodies, no words, no logos, no border, no UI. Center important subjects with enough margin for both a 16:9 thumbnail crop and a tall desktop entry crop. Render fresh fine detail and clean edges; do not enlarge blur.",
+  "source": "/Users/adrianprieto/.codex/generated_images/01a1332c-7db7-70b2-82d4-c330ee99e8a2/exec-935844e1-9244-4b78-a126-937b178e1045.png",
+  "reference": "/Users/adrianprieto/.codex/generated_images/01a1332c-7db7-70b2-82d4-c330ee99e8a2/exec-b84fd645-3ad9-4aa7-af03-00950584faa1.png",
+  "tool": "built-in image_gen",
+  "version": 2
+}

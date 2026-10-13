@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  htmlLimitedBots: /.*/,
+  images: {
+    localPatterns: [
+      { pathname: "/**", search: "" },
+      { pathname: "/game-covers/**", search: "?v=2" },
+    ],
+  },
 };
 
 export default nextConfig;

@@ -1,0 +1,35 @@
+- generic [active] [ref=e1]:
+  - main [ref=e2]:
+    - main [ref=e3]:
+      - dialog [ref=e5]:
+        - heading "¡Bienvenido a Game Hub!" [level=2] [ref=e6]
+        - paragraph [ref=e7]: Elige tu país y entra a jugar.
+        - generic [ref=e8]:
+          - generic [ref=e9]:
+            - generic [ref=e10]: Tu país
+            - combobox "Tu país" [ref=e11]:
+              - option "Argentina"
+              - option "Bolivia"
+              - option "Brasil"
+              - option "Canadá"
+              - option "Chile"
+              - option "Colombia" [selected]
+              - option "Costa Rica"
+              - option "Cuba"
+              - option "Ecuador"
+              - option "El Salvador"
+              - option "España"
+              - option "Estados Unidos"
+              - option "Guatemala"
+              - option "Honduras"
+              - option "México"
+              - option "Nicaragua"
+              - option "Panamá"
+              - option "Paraguay"
+              - option "Perú"
+              - option "Puerto Rico"
+              - option "República Dominicana"
+              - option "Uruguay"
+              - option "Venezuela"
+          - button "Entrar al hub" [ref=e12]
+  - button "Open Next.js Dev Tools" [ref=e18] [cursor=pointer]

@@ -1,0 +1,7 @@
+{
+  "prompt": "Edit target: the attached game artwork. Produce one high-detail landscape image in EXACT 3:2 aspect ratio, 1536 x 1024 pixels or larger, NOT 16:9. Preserve the same recognizable game subjects, scene, camera angle, relative composition, burgundy/plum/crimson palette with golden highlights, original polished family-friendly 3D illustration style. Extend the background vertically above and below so the taller canvas maintains all existing subjects and leaves safe margins for tall entry-screen crops. Reconstruct fine material texture and crisp edges at native resolution, not a blurry enlargement. No new objects or characters, words, logos, border, contact sheet, UI or text. Retain existing symbolic X/O shapes if present; do not add lettering. This taller, sharp artwork will also be cropped to a 16:9 game thumbnail.",
+  "source": "/Users/adrianprieto/.codex/generated_images/01a1332c-7db7-70b2-82d4-c330ee99e8a2/exec-cbf05413-ae39-4054-bd93-68ed22264604.png",
+  "reference": "/Users/adrianprieto/.codex/generated_images/01a1332c-7db7-70b2-82d4-c330ee99e8a2/exec-379bf476-4f05-4f92-9dfb-55997b974ab4.png",
+  "tool": "built-in image_gen",
+  "version": 2
+}

@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import GameEntryScreen from "./GameEntryScreen";
 
 type Cell = "X" | "O" | "draw" | null;
 type Player = "X" | "O";
 type GameMode = "pvp" | "ai";
 type Difficulty = "easy" | "medium" | "hard";
 
-export default function Radiotricky({ onBack }: { onBack: () => void }) {
+export default function Radiotricky() {
   const [board, setBoard] = useState<Cell[]>(Array(9).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState<Player>("X");
   const [winner, setWinner] = useState<Cell>(null);
@@ -135,35 +136,24 @@ export default function Radiotricky({ onBack }: { onBack: () => void }) {
 
   if (showModeSelect) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 p-4 overflow-hidden relative" 
-           style={{ 
-             background: 'linear-gradient(45deg, #00ff00, #39ff14, #ccff00, #ffff00, #ff6600, #ff0000, #cc00ff)',
-             backgroundSize: '400% 400%',
-             animation: 'gradientBG 10s ease infinite'
-           }}>
-        <style>{`
-          @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-        `}</style>
-        <div className="text-center">
-          <h1 className="text-6xl font-black italic mb-2">RADIO<span className="text-green-400">TRICKY</span></h1>
-          <p className="text-zinc-300">Tres en Raya con onda</p>
-        </div>
+      <GameEntryScreen
+        title="Radiotricky"
+        description="Tres en Raya con onda. Juega contra la IA o reta a un amigo."
+        image="/game-covers/cover-6.webp"
+      >
         <div className="flex flex-col gap-4 items-center">
-          <div className="flex gap-4">
-            <button onClick={() => { setMode("pvp"); setShowModeSelect(false); }} className="rounded-xl bg-green-600 px-8 py-4 font-bold text-xl hover:bg-green-500">VS Amigo</button>
-            <button onClick={() => { setMode("ai"); setShowModeSelect(false); }} className="rounded-xl bg-purple-600 px-8 py-4 font-bold text-xl hover:bg-purple-500">VS IA</button>
+          <h2 className="self-start text-xl font-extrabold">Elige cómo jugar</h2>
+          <div className="grid w-full gap-3 sm:grid-cols-2">
+            <button onClick={() => { setMode("pvp"); setShowModeSelect(false); }} className="min-h-12 rounded-xl bg-[#fff34b] px-6 py-3 text-lg font-black text-[#180e13] transition hover:bg-[#fff877] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">VS amigo</button>
+            <button onClick={() => { setMode("ai"); setShowModeSelect(false); }} className="min-h-12 rounded-xl border border-white/15 bg-[#392126] px-6 py-3 text-lg font-bold text-white transition hover:bg-[#4a2932] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b]">VS IA</button>
           </div>
           {mode === "ai" && (
-            <div className="flex gap-2 mt-2">
+            <div className="mt-2 grid w-full grid-cols-3 gap-2">
               {(["easy", "medium", "hard"] as Difficulty[]).map(diff => (
                 <button 
                   key={diff} 
                   onClick={() => setDifficulty(diff)} 
-                  className={`px-4 py-2 rounded-lg font-bold uppercase text-sm transition-all ${difficulty === diff ? 'bg-white text-purple-600 scale-110' : 'bg-purple-900/50 text-purple-200 hover:bg-purple-800'}`}
+                  className={`min-h-11 rounded-lg px-3 py-2 text-sm font-bold transition ${difficulty === diff ? "bg-[#fff34b] text-[#180e13]" : "bg-[#392126] text-rose-100/75 hover:bg-[#4a2932]"}`}
                 >
                   {diff === "easy" ? "Fácil" : diff === "medium" ? "Medio" : "Difícil"}
                 </button>
@@ -171,25 +161,12 @@ export default function Radiotricky({ onBack }: { onBack: () => void }) {
             </div>
           )}
         </div>
-        <button onClick={onBack} className="text-zinc-400 underline mt-8">Volver al Hub</button>
-      </div>
+      </GameEntryScreen>
     );
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 p-4 overflow-hidden relative" 
-         style={{ 
-           background: 'linear-gradient(45deg, #00ff00, #39ff14, #ccff00, #ffff00, #ff6600, #ff0000, #cc00ff)',
-           backgroundSize: '400% 400%',
-           animation: 'gradientBG 10s ease infinite'
-         }}>
-      <style>{`
-        @keyframes gradientBG {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-      `}</style>
+    <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 overflow-hidden bg-[#180e13] p-4 text-white">
       <div className="flex items-center justify-between w-full max-w-md">
         <h1 className="text-4xl font-black italic">RADIO<span className="text-green-400">TRICKY</span></h1>
         <button onClick={() => { setShowModeSelect(true); resetScore(); }} className="text-zinc-400 underline hover:text-white">Cambiar modo</button>
@@ -236,7 +213,6 @@ export default function Radiotricky({ onBack }: { onBack: () => void }) {
         Turno: <span className={currentPlayer === "X" ? "text-green-400" : "text-pink-400"}>✕</span> / <span className={currentPlayer === "O" ? "text-pink-400" : "text-zinc-400"}>◯</span>
       </div>
 
-      <button onClick={onBack} className="text-zinc-400 underline mt-4">Volver al Hub</button>
     </div>
   );
 }

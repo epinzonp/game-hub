@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { reproducirFunkVictoria, reproducirTicTac } from "../../lib/sonido";
+import GameEntryScreen from "./GameEntryScreen";
 
 type Difficulty = "easy" | "medium" | "hard" | "impossible";
 
-export default function PinPon({ onBack }: { onBack: () => void }) {
+export default function PinPon() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState({ player: 0, ai: 0 });
   const [gameState, setGameState] = useState<"menu" | "difficulty" | "playing" | "gameOver">("menu");
@@ -149,11 +150,48 @@ export default function PinPon({ onBack }: { onBack: () => void }) {
     }, [gameState]);
 
 
+  if (gameState === "menu") {
+    return (
+      <GameEntryScreen
+        title="Pin Pon"
+        description="Devuelve la pelota y mantén el ritmo para ganar."
+        image="/game-covers/cover-5.webp"
+      >
+        <h2 className="text-xl font-extrabold">¿Listo para jugar?</h2>
+        <p className="text-sm leading-6 text-rose-100/70">Mueve el ratón para controlar tu paleta y vencer a la IA.</p>
+        <button
+          onClick={() => setGameState("difficulty")}
+          className="min-h-12 rounded-xl bg-[#fff34b] px-8 py-3 text-lg font-black text-[#180e13] transition hover:bg-[#fff877] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+        >
+          ¡Jugar!
+        </button>
+      </GameEntryScreen>
+    );
+  }
+
+  if (gameState === "difficulty") {
+    return (
+      <GameEntryScreen
+        title="Pin Pon"
+        description="Escoge el nivel de reto para esta partida."
+        image="/game-covers/cover-5.webp"
+      >
+        <h2 className="text-xl font-extrabold">Selecciona dificultad</h2>
+        <div className="grid grid-cols-2 gap-3">
+          {([["easy", "Fácil"], ["medium", "Medio"], ["hard", "Difícil"], ["impossible", "Imposible"]] as const).map(([level, label]) => (
+            <button key={level} onClick={() => { setDifficulty(level); setScore({ player: 0, ai: 0 }); setGameState("playing"); }} className="min-h-12 rounded-xl border border-white/10 bg-[#392126] px-4 py-3 font-bold text-white transition hover:border-[#fff34b]/60 hover:bg-[#4a2932] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b]">
+              {label}
+            </button>
+          ))}
+        </div>
+      </GameEntryScreen>
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 p-4 overflow-hidden relative bg-zinc-950">
       <div className="flex items-center justify-between w-full max-w-md mb-4">
         <h1 className="text-4xl font-black italic text-white">PIN <span className="text-amber-500">PON</span></h1>
-        <button onClick={onBack} className="text-zinc-400 underline hover:text-white">Volver</button>
       </div>
 
       <div className="flex gap-8 text-3xl font-mono mb-4">
@@ -161,37 +199,7 @@ export default function PinPon({ onBack }: { onBack: () => void }) {
         <div className="text-pink-400">IA: {score.ai}</div>
       </div>
 
-       {gameState === "menu" ? (
-         <div className="flex flex-col items-center gap-6">
-           <div className="relative">
-             <canvas 
-               ref={canvasRef} 
-               width={600} 
-               height={400} 
-               className="border-4 border-zinc-800 rounded-xl bg-black"
-             />
-             <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-xl">
-               <button 
-                 onClick={() => setGameState("difficulty")} 
-                 className="bg-amber-500 text-black px-8 py-4 rounded-2xl font-black text-2xl hover:bg-amber-400 transition-all"
-               >
-                 ¡JUGAR!
-               </button>
-             </div>
-           </div>
-         </div>
-       ) : gameState === "difficulty" ? (
-         <div className="flex flex-col items-center gap-6">
-           <h2 className="text-3xl font-black text-white mb-4">Selecciona Dificultad</h2>
-           <div className="grid grid-cols-2 gap-4">
-             <button onClick={() => { setDifficulty("easy"); setScore({ player: 0, ai: 0 }); setGameState("playing"); }} className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-500">Fácil</button>
-             <button onClick={() => { setDifficulty("medium"); setScore({ player: 0, ai: 0 }); setGameState("playing"); }} className="bg-yellow-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-yellow-500">Medio</button>
-             <button onClick={() => { setDifficulty("hard"); setScore({ player: 0, ai: 0 }); setGameState("playing"); }} className="bg-orange-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-500">Difícil</button>
-             <button onClick={() => { setDifficulty("impossible"); setScore({ player: 0, ai: 0 }); setGameState("playing"); }} className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-500">Imposible</button>
-           </div >
-           <button onClick={() => setGameState("menu")} className="text-zinc-500 underline">Volver</button>
-         </div>
-       ) : gameState === "gameOver" ? (
+       {gameState === "gameOver" ? (
          <div className="relative">
            <canvas 
              ref={canvasRef} 

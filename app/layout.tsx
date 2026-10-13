@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import CastleBackground from "./components/CastleBackground";
+import { Geist_Mono, Inter } from "next/font/google";
+import ConvexClientProvider from "./ConvexClientProvider";
 import "./globals.css";
+import { cn } from "@/lib/utils";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -14,19 +12,47 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "El Ahorcado",
-  description: "Adivina la palabra antes de que el muñeco caiga en la lava",
+  title: {
+    default: "GAMEHUB | Juegos casuales para jugar en familia",
+    template: "%s | GAMEHUB",
+  },
+  applicationName: "GAMEHUB",
+  description:
+    "Descubre juegos casuales para jugar, competir y divertirte en familia.",
+  openGraph: {
+    title: "GAMEHUB",
+    description:
+      "Descubre juegos casuales para jugar, competir y divertirte en familia.",
+    siteName: "GAMEHUB",
+    locale: "es_CO",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "GAMEHUB",
+    description:
+      "Descubre juegos casuales para jugar, competir y divertirte en familia.",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn(
+        "h-full",
+        "bg-[#180e13]",
+        "antialiased",
+        geistMono.variable,
+        "font-sans",
+        inter.variable,
+      )}
     >
-      <body className="relative isolate h-full overflow-auto bg-[#1a1033]">
-        <CastleBackground />
-        <main className="relative z-10 flex min-h-full">{children}</main>
+      <body className="relative isolate h-full overflow-auto bg-[#180e13]">
+        <ConvexClientProvider>
+          <div className="relative z-10 flex min-h-full">{children}</div>
+        </ConvexClientProvider>
       </body>
     </html>
   );
