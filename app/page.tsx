@@ -5,6 +5,7 @@ import { useSyncExternalStore } from "react";
 
 const profileKey = "user-profile";
 const profileChangeEvent = "user-profile-change";
+const hydrationPending = "\u0000";
 
 function getSavedProfile(): string | null {
   const saved = localStorage.getItem(profileKey);
@@ -51,8 +52,9 @@ export default function Home() {
   const savedProfile = useSyncExternalStore(
     subscribeToProfile,
     getSavedProfile,
-    () => null,
+    () => hydrationPending,
   );
+  const isReady = savedProfile !== hydrationPending;
   const [
     encodedName = "",
     encodedCountry = "",
@@ -80,7 +82,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen w-full overflow-x-hidden bg-zinc-950 text-zinc-50">
-      {profile ? (
+      {isReady && (profile ? (
         <GameHub
           name={profile.name}
           country={profile.country}
@@ -92,7 +94,7 @@ export default function Home() {
         <main className="min-h-screen">
           <UserProfileModal onSave={handleSaveProfile} />
         </main>
-      )}
+      ))}
     </div>
   );
 }
