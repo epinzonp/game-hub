@@ -4,13 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { useEffect, useState, useSyncExternalStore } from "react";
-import {
-  readCoinBalance,
-  saveCoinBalance,
-  subscribeToCoins,
-} from "@/lib/coins";
-import CoinLeaderboard from "./CoinLeaderboard";
+import { useEffect, useRef, useState } from "react";
+import { ConvexError } from "convex/values";
+import { avatars, normalizeAvatarId } from "@/lib/avatars";
+import type { GameRouteId } from "@/lib/game-routes";
+import { useGameNavigation } from "./GameNavigationGuard";
+import AvatarSetupDialog from "./AvatarSetupDialog";
 import {
   ArrowRight,
   ArrowUpRight,
@@ -37,19 +36,9 @@ import Radiotricky from "./Radiotricky";
 import PinPon from "./PinPon";
 import NoLeDesOPegale from "./NoLeDesOPegale";
 
-type GameId =
-  | "hangman"
-  | "tiragol"
-  | "airhockey"
-  | "botecolor"
-  | "pinpon"
-  | "radiotricky"
-  | "friends"
-  | "store"
-  | "noledes"
-  | null;
+type GameId = GameRouteId | "friends" | "store" | null;
 
-const games = [
+export const games = [
   {
     id: "hangman",
     title: "El Ahorcado",
@@ -101,36 +90,9 @@ const games = [
   },
 ] as const;
 
-const avatars = [
-  { id: "starter-fox", name: "Fox Pilot", price: 0, tier: "starter" },
-  { id: "neon-raccoon", name: "Neon Raccoon", price: 500, tier: "rare" },
-  { id: "astro-cat", name: "Astro Cat", price: 1000, tier: "rare" },
-  { id: "cyber-gecko", name: "Cyber Gecko", price: 2000, tier: "epic" },
-  { id: "shadow-raven", name: "Shadow Raven", price: 5000, tier: "epic" },
-  { id: "magma-dragon", name: "Magma Dragon", price: 10000, tier: "legendary" },
-  { id: "cosmic-wolf", name: "Cosmic Wolf", price: 15000, tier: "legendary" },
-  { id: "aurora-koi", name: "Aurora Koi", price: 20000, tier: "mythic" },
-  {
-    id: "celestial-knight",
-    name: "Celestial Knight",
-    price: 30000,
-    tier: "mythic",
-  },
-  { id: "avatar-67", name: "67 Phantom", price: 67000, tier: "mythic" },
-];
-
 const avatarById = Object.fromEntries(
   avatars.map((avatar) => [avatar.id, avatar]),
 );
-const legacyAvatarIds: Record<string, string> = {
-  "😊": "starter-fox",
-  "😢": "astro-cat",
-  "😡": "magma-dragon",
-  "😱": "shadow-raven",
-  "😎": "cosmic-wolf",
-  "😴": "aurora-koi",
-  "67": "avatar-67",
-};
 const tierLabels: Record<string, string> = {
   starter: "Inicial",
   rare: "Raro",
@@ -138,11 +100,6 @@ const tierLabels: Record<string, string> = {
   legendary: "Legendario",
   mythic: "Mítico",
 };
-
-function normalizeAvatarId(id: string | null) {
-  if (!id) return null;
-  return id in avatarById ? id : (legacyAvatarIds[id] ?? null);
-}
 
 function AvatarPortrait({
   id,
@@ -180,15 +137,36 @@ function AccountMenu({
   name,
   country,
   avatar,
+  coins,
+  maxCoins,
   onSignOut,
 }: {
   name: string;
   country: string;
   avatar: string | null;
+  coins: number;
+  maxCoins: number;
   onSignOut: () => void;
 }) {
+  const menuRef = useRef<HTMLDetailsElement>(null);
+
+  useEffect(() => {
+    function closeOnOutsideClick(event: PointerEvent) {
+      if (
+        !(event.target instanceof Node) ||
+        !menuRef.current?.contains(event.target)
+      ) {
+        menuRef.current?.removeAttribute("open");
+      }
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsideClick);
+    return () =>
+      document.removeEventListener("pointerdown", closeOnOutsideClick);
+  }, []);
+
   return (
-    <details className="group relative shrink-0">
+    <details ref={menuRef} className="group relative shrink-0 md:ml-auto">
       <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-full border border-white/10 bg-[#351e24] py-1 pl-1 pr-3 transition hover:border-white/25 hover:bg-[#40242c] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] [&::-webkit-details-marker]:hidden">
         <span className="grid size-9 place-items-center overflow-hidden rounded-full border border-[#fff34b]/45 bg-[#392126] text-xs font-black text-[#fff34b]">
           {avatar ? (
@@ -228,6 +206,20 @@ function AccountMenu({
             <p className="truncate text-sm text-rose-100/60">{country}</p>
           </div>
         </div>
+        <dl className="grid gap-3 border-t border-white/10 px-4 py-4 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-rose-100/70">Monedas actuales</dt>
+            <dd className="font-extrabold tabular-nums text-[#fff34b]">
+              {coins.toLocaleString("es-CO")}
+            </dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-rose-100/70">Máximo alcanzado</dt>
+            <dd className="font-extrabold tabular-nums text-[#fff34b]">
+              {maxCoins.toLocaleString("es-CO")}
+            </dd>
+          </div>
+        </dl>
         <div className="border-t border-white/10 p-2">
           <button
             type="button"
@@ -248,30 +240,34 @@ export default function GameHub({
   country,
   initialAvatar,
   initialCoins,
+  maxCoins,
+  initialGame,
   onSignOut,
+  onPurchase,
+  onWin,
   startInStore = false,
 }: {
   name: string;
   country: string;
   initialAvatar: string | null;
   initialCoins: number;
+  maxCoins: number;
+  initialGame?: GameRouteId;
   onSignOut: () => void;
+  onPurchase: (avatar: string) => Promise<void>;
+  onWin: () => Promise<void>;
   startInStore?: boolean;
 }) {
   const router = useRouter();
+  const requestNavigation = useGameNavigation();
   const [currentGame, setCurrentGame] = useState<GameId>(
-    startInStore || !initialAvatar ? "store" : null,
+    !initialAvatar ? "store" : (initialGame ?? (startInStore ? "store" : null)),
   );
-  const [daysLeft, setDaysLeft] = useState(10);
   const [musicaActiva, setMusicaActiva] = useState(false);
-  const coins = useSyncExternalStore(
-    subscribeToCoins,
-    readCoinBalance,
-    () => initialCoins,
-  );
-  const [selectedCube, setSelectedCube] = useState<string | null>(
-    normalizeAvatarId(initialAvatar),
-  );
+  const coins = initialCoins;
+  const selectedCube = normalizeAvatarId(initialAvatar);
+  const [purchasePending, setPurchasePending] = useState(false);
+  const [purchaseError, setPurchaseError] = useState("");
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
   const handleGameSelect = (game: GameId) => {
@@ -283,28 +279,13 @@ export default function GameHub({
       setCurrentGame(game);
       return;
     }
-    if (!localStorage.getItem("user-cube")) {
+    if (!selectedCube) {
       alert("Antes de empezar tienes que ir a la tienda y escoger el avatar");
       handleGameSelect("store");
       return;
     }
-    setCurrentGame(game);
+    router.push(`/games/${game}`);
   };
-
-  useEffect(() => {
-    const savedDate = localStorage.getItem("next-game-date");
-    if (!savedDate) {
-      const targetDate = new Date();
-      targetDate.setDate(targetDate.getDate() + 10);
-      localStorage.setItem("next-game-date", targetDate.toISOString());
-    }
-
-    const next = new Date(localStorage.getItem("next-game-date") || "");
-    const diffDays = Math.floor(
-      (next.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
-    );
-    setDaysLeft(diffDays > 0 ? diffDays : 0);
-  }, []);
 
   useEffect(() => {
     if (currentGame !== null || !musicaActiva) {
@@ -315,12 +296,24 @@ export default function GameHub({
     return detenerFunkLoop;
   }, [currentGame, musicaActiva]);
 
+  useEffect(() => {
+    if (initialGame && !selectedCube) router.replace("/store");
+  }, [initialGame, router, selectedCube]);
+
+  if (initialGame && !selectedCube) {
+    return (
+      <p role="status" className="p-10 text-center text-white">
+        Abriendo la tienda…
+      </p>
+    );
+  }
+
   const renderGame = (game: ReactNode) => (
     <>
       {game}
       <button
         type="button"
-        onClick={() => setCurrentGame(null)}
+        onClick={() => requestNavigation("/")}
         className="fixed left-4 top-4 z-[1000] inline-flex min-h-11 items-center gap-2 rounded-full border border-white/15 bg-[#241519]/95 px-4 py-2 text-sm font-bold text-white shadow-lg backdrop-blur transition hover:bg-[#392126] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b]"
       >
         <House className="size-4 text-[#fff34b]" aria-hidden="true" />
@@ -330,10 +323,12 @@ export default function GameHub({
   );
 
   if (currentGame === "hangman") {
-    return renderGame(<HangmanGameWrapper />);
+    return renderGame(
+      <HangmanGameWrapper name={name} country={country} onWin={onWin} />,
+    );
   }
   if (currentGame === "tiragol") {
-    return renderGame(<Tiragol onBack={() => setCurrentGame(null)} />);
+    return renderGame(<Tiragol onBack={() => requestNavigation("/")} />);
   }
   if (currentGame === "noledes") {
     return renderGame(<NoLeDesOPegale />);
@@ -371,38 +366,55 @@ export default function GameHub({
   }
 
   if (currentGame === "store") {
-    const buyAvatar = (avatarId: string) => {
+    const buyAvatar = async (avatarId: string) => {
       const avatar = avatarById[avatarId as keyof typeof avatarById];
-      if (!avatar) return;
+      if (!avatar || purchasePending) return;
       if (coins < avatar.price) {
         alert("No tienes suficientes monedas");
         return;
       }
-      localStorage.setItem("user-cube", avatar.id);
-      const nextCoins = avatar.price > 0 ? coins - avatar.price : coins;
-      if (avatar.price > 0) {
-        saveCoinBalance(nextCoins);
+      setPurchasePending(true);
+      setPurchaseError("");
+      try {
+        await onPurchase(avatar.id);
+        setPreviewAvatar(null);
+      } catch (error) {
+        setPurchaseError(
+          error instanceof ConvexError && typeof error.data === "string"
+            ? error.data
+            : "No pudimos guardar tu avatar. Inténtalo de nuevo.",
+        );
+      } finally {
+        setPurchasePending(false);
       }
-      setSelectedCube(avatar.id);
-      setPreviewAvatar(null);
     };
 
     return (
       <div className="min-h-screen w-full bg-[#170d12] text-white">
         <header className="flex min-h-20 items-center justify-between border-b border-white/10 bg-[#241318] px-5 sm:px-10">
-          <button
-            onClick={() => router.push("/")}
-            disabled={!selectedCube}
-            className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f5ee23] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <ArrowRight className="size-4 rotate-180" aria-hidden="true" />
-            {selectedCube ? "Volver al hub" : "Elige un avatar para continuar"}
-          </button>
+          {selectedCube ? (
+            <button
+              onClick={() => {
+                setCurrentGame(null);
+                router.push("/");
+              }}
+              className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f5ee23] disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <ArrowRight className="size-4 rotate-180" aria-hidden="true" />
+              Volver al hub
+            </button>
+          ) : (
+            <span className="text-sm font-bold text-[#fff34b]">
+              Tu primer avatar
+            </span>
+          )}
           <div className="flex items-center gap-3">
             <AccountMenu
               name={name}
               country={country}
               avatar={selectedCube}
+              coins={coins}
+              maxCoins={maxCoins}
               onSignOut={onSignOut}
             />
             <div className="inline-flex items-center gap-2 rounded-full bg-[#392126] px-4 py-2 font-extrabold tabular-nums text-[#fff34b]">
@@ -447,7 +459,6 @@ export default function GameHub({
             </div>
           </section>
 
-          <CoinLeaderboard />
           <section aria-labelledby="avatars-heading">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
               <div>
@@ -521,9 +532,27 @@ export default function GameHub({
             </div>
           </section>
         </main>
+        {!selectedCube && (
+          <AvatarSetupDialog
+            coins={coins}
+            onSignOut={onSignOut}
+            onChoose={async (avatar) => {
+              await onPurchase(avatar);
+              setCurrentGame(null);
+              router.push("/");
+            }}
+          />
+        )}
         {previewAvatar &&
           avatarById[previewAvatar as keyof typeof avatarById] && (
-            <div className="fixed inset-0 z-50 grid place-items-center bg-[#10090d]/80 p-4 backdrop-blur-sm">
+            <div
+              className="fixed inset-0 z-50 grid place-items-center bg-[#10090d]/80 p-4 backdrop-blur-sm"
+              onPointerDown={(event) => {
+                if (event.target === event.currentTarget) {
+                  setPreviewAvatar(null);
+                }
+              }}
+            >
               <div
                 role="dialog"
                 aria-modal="true"
@@ -557,16 +586,23 @@ export default function GameHub({
                 <button
                   type="button"
                   onClick={() => buyAvatar(previewAvatar)}
-                  disabled={selectedCube === previewAvatar}
+                  disabled={purchasePending || selectedCube === previewAvatar}
                   className="min-h-12 w-full rounded-xl bg-[#fff34b] px-5 font-black text-[#180e13] transition hover:bg-[#fff877] disabled:cursor-default disabled:opacity-60"
                 >
-                  {selectedCube === previewAvatar
-                    ? "Avatar seleccionado"
-                    : avatarById[previewAvatar as keyof typeof avatarById]
-                          .price === 0
-                      ? "Elegir gratis"
-                      : `Comprar por ${avatarById[previewAvatar as keyof typeof avatarById].price.toLocaleString("es-CO")} monedas`}
+                  {purchasePending
+                    ? "Guardando…"
+                    : selectedCube === previewAvatar
+                      ? "Avatar seleccionado"
+                      : avatarById[previewAvatar as keyof typeof avatarById]
+                            .price === 0
+                        ? "Elegir gratis"
+                        : `Comprar por ${avatarById[previewAvatar as keyof typeof avatarById].price.toLocaleString("es-CO")} monedas`}
                 </button>
+                {purchaseError && (
+                  <p role="alert" className="mt-3 text-sm text-rose-200">
+                    {purchaseError}
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -579,7 +615,7 @@ export default function GameHub({
       <header className="sticky top-0 z-30 border-b border-white/10 bg-[#241519]">
         <nav
           aria-label="Navegación principal"
-          className="mx-auto flex min-h-[72px] max-w-[1600px] flex-wrap items-center gap-2 px-4 py-3 sm:gap-4 sm:px-8 xl:gap-6 2xl:flex-nowrap"
+          className="mx-auto flex min-h-[72px] max-w-[1600px] flex-wrap items-center gap-2 px-4 py-3 sm:gap-4 sm:px-8 2xl:flex-nowrap"
         >
           <a
             href="#inicio"
@@ -682,6 +718,8 @@ export default function GameHub({
             name={name}
             country={country}
             avatar={selectedCube}
+            coins={coins}
+            maxCoins={maxCoins}
             onSignOut={onSignOut}
           />
         </nav>
@@ -733,7 +771,7 @@ export default function GameHub({
               >
                 <span className="relative block aspect-[16/9] overflow-hidden rounded-[14px] bg-[#321a20]">
                   <Image
-                    src={game.image}
+                    src={`${game.image}?v=2`}
                     alt=""
                     fill
                     sizes="(max-width: 640px) 82vw, (max-width: 1024px) 46vw, 25vw"
@@ -807,8 +845,9 @@ export default function GameHub({
         </section>
 
         <section className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-rose-100/55 sm:flex-row sm:items-center sm:justify-between">
-          <p>Próximo juego en {daysLeft} días</p>
-          <p>por: ernesto pinzon</p>
+          <p className="credit-rainbow">
+            <span>Por: Ernesto Pinzón</span>
+          </p>
           <p>
             Música:{" "}
             <a

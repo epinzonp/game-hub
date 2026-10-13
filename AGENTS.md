@@ -10,6 +10,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # Game Hub: product and design guide
 
+## Database safety
+
+- Never mutate production or cloud database data, and never run destructive resets, imports, or schema changes against those deployments. Use the local Convex deployment for all agent testing and mutations.
+- Before clearing or resetting local database data, inspect the target and get explicit user authorization.
+
+## Game routes and scoring
+
+- Give every playable game its own stable route under `/games/<game-id>`. Keep hub launch buttons, direct links, and browser navigation aligned with the game ID.
+- Keep an unfinished game's points in memory only. Persist or award points only after the game reaches its completed result. Leaving an unfinished game through an in-app link, the hub control, browser back, or page unload must show a blocking confirmation that says the current run's points will be lost.
+- Use [docs/README.md](docs/README.md) as the developer and agent documentation gateway. Keep a guide in `docs/games/` for every playable game, covering its goal, mechanics, controls, completion conditions, and score persistence; add and update the guide and game index whenever a game is added or its mechanics change.
+
 ## What this page is
 
 Game Hub is a Spanish-language web hub for kids and families who want quick, casual games they can start playing without friction. The landing page helps visitors browse the available games, the friends entry point introduces social play, and the local shop lets players personalize their avatar with the existing coin and selection flow. Keep product facts in [PRODUCT.md](PRODUCT.md); this file describes how to preserve the experience while changing it.

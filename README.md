@@ -2,15 +2,19 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-### Live coin leaderboard
+### Authentication and saved progress
 
-Install dependencies with `npm install`. Run `npm run dev:convex` in one terminal and `npm run dev` in another. Convex writes `NEXT_PUBLIC_CONVEX_URL` to `.env.local`. Keep the existing Supabase variables for the existing middleware.
+Install dependencies with `npm install`, then run `npm run dev` to start Next.js and the local Convex backend together. `npm run dev:convex` starts only the local backend when needed. Players create an account with a unique nickname, a four-digit PIN, and their country. No email or external authentication provider is required. This browser remembers the session for up to 90 days; use the same nickname and PIN on another device to load the same coins, avatar, and record. Signing out revokes only the current session.
 
-Without a Convex account, initialize local development with `CONVEX_AGENT_MODE=anonymous npx convex dev`. This backend supports live updates between browsers on this machine. For shared access across devices, run `npx convex login`, then `npx convex dev --configure new --dev-deployment cloud`. Use the same cloud URL for every frontend client. For production, deploy with `npx convex deploy` and set the frontend's `NEXT_PUBLIC_CONVEX_URL` to that deployment's URL before building.
+Convex stores player profiles, coins, selected avatars, highest balances, salted PIN hashes, and hashed session tokens. Five incorrect PIN attempts lock login for five minutes. This is simple authentication for a casual game: there is no email recovery or PIN reset flow, so players need to remember their nickname and PIN. The frontend only needs `NEXT_PUBLIC_CONVEX_URL`.
 
-The dedicated `/leaderboard` route and the compact shop board rank the top ten guest players by their highest coin balance, including the initial saved balance and new Hangman rewards. The landing header links to the leaderboard. Purchases keep the peak intact. Guest identities persist per browser and change on sign-out; they are not cross-device accounts. Records do not prove gameplay because coin balances remain local and client-reported. Historical peaks before this feature cannot be recovered.
+Local development uses the anonymous local Convex deployment so development mutations stay off cloud databases. For access across devices, link a cloud deployment using `npx convex login`, then `npx convex dev --configure new --dev-deployment cloud`, use the same cloud URL for all clients. Local account persistence works across browser sessions on this machine; production access requires cloud setup.
 
-Run `npm test`, `npm run lint`, and `npm run build` to verify changes. See [the schema notes](docs/database-schema.md) for indexes and validation.
+Moving from local Convex to a cloud deployment creates a different database. Export the local data before relinking and import that snapshot into the new deployment to retain existing profiles, balances, avatars, and guest records.
+
+The `/leaderboard` route ranks the ten highest coin balances. Purchases never reduce the record. Players can explicitly transfer this browser's legacy guest progress once during initial profile setup. Existing accounts always load their database progress instead of importing local balances again. Rewards remain client-reported gameplay outcomes; authentication does not prevent cheating.
+
+Run `npm test`, `npm run lint`, and `npm run build`. See [the schema notes](docs/database-schema.md) for authorization and migration behavior.
 
 First, run the development server:
 

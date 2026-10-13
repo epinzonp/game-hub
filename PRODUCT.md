@@ -16,9 +16,9 @@ Game Hub brings a collection of casual games together so visitors can choose a g
 
 ## Capabilities and Constraints
 
-- The hub includes solo and multiplayer game experiences, a friends entry, and a local avatar shop.
-- The shop uses locally stored coins and avatar choices; preserve its existing selection and purchase behavior.
-- `/leaderboard` shows the live top ten coin records with a podium and ranking rows. The landing header links to it, and the shop keeps its compact board. Spending coins never lowers a record. Players are guests identified in this browser; clearing browser data creates a new identity, and balances are client-reported.
+- The hub includes solo and multiplayer game experiences, a friends entry, and an avatar shop.
+- Players sign up and log in with a unique nickname and a four-digit PIN; their browser remembers the session. No email or external authentication provider is required. Convex stores their profile, coin balance, selected avatar, and highest balance. Preserve the existing avatar catalog, costs, and 100-coin Hangman reward.
+- `/leaderboard` shows the live top ten coin records with a podium and ranking rows. The landing header links to it; the store does not show leaderboard records. Spending coins never lowers a record. Players return to the same database-backed profile after sign-in. Existing guest progress can be transferred once by explicit choice. Game victories remain client-reported.
 - This redesign changes the landing page, game thumbnails, and shop presentation. Existing game experiences remain unchanged.
 
 ## Brand Commitments
@@ -29,5 +29,5 @@ Game Hub brings a collection of casual games together so visitors can choose a g
 
 ## Evidence on Hand
 
-- Existing game list, descriptions, avatar options, and local shop behavior are in `app/components/GameHub.tsx`.
+- Existing game list, descriptions, avatar options, and shop behavior are in `app/components/GameHub.tsx`.
 - No original game thumbnail artwork is present in `public/`.

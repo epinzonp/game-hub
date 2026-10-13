@@ -1,14 +1,30 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import HangmanGame, { type Resultado } from "./HangmanGame";
 import HangmanLeaderboard from "./HangmanLeaderboard";
 import GameEntryScreen from "./GameEntryScreen";
 import { PALABRAS, type Palabra } from "@/lib/palabras";
 import { reproducirMelodiaTriste } from "@/lib/sonido";
-import { readCoinBalance, saveCoinBalance } from "@/lib/coins";
 
 type Screen = "hub" | "playing" | "end" | "country-selection";
+
+type LocalScore = { name: string; country: string; points: number };
+
+function isLocalScore(value: unknown): value is LocalScore {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "name" in value &&
+    typeof value.name === "string" &&
+    "country" in value &&
+    typeof value.country === "string" &&
+    "points" in value &&
+    typeof value.points === "number" &&
+    Number.isSafeInteger(value.points) &&
+    value.points >= 0
+  );
+}
 
 interface Dificultad {
   nombre: string;
@@ -29,48 +45,38 @@ function elegirPalabra(longMin: number): Palabra {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-export default function HangmanGameWrapper() {
+export default function HangmanGameWrapper({
+  name,
+  country: playerCountry,
+  onWin,
+}: {
+  name: string;
+  country: string;
+  onWin: () => Promise<void>;
+}) {
   const [screen, setScreen] = useState<Screen>("hub");
   const [palabra, setPalabra] = useState<Palabra | null>(null);
   const [resultado, setResultado] = useState<Resultado | null>(null);
   const [mostrarAyuda, setMostrarAyuda] = useState(false);
   const [racha, setRacha] = useState(0);
-  const [country, setCountry] = useState<string | null>(null);
-
-  useEffect(() => {
-    const savedCountry = localStorage.getItem("hangman-user-country");
-    if (savedCountry) setCountry(savedCountry);
-  }, []);
-
+  const [rewardError, setRewardError] = useState("");
   const dificultad = dificultadDeRacha(racha);
 
   const jugar = useCallback(() => {
+    setRewardError("");
     setPalabra(elegirPalabra(dificultad.longMin));
     setResultado(null);
     setScreen("playing");
   }, [dificultad.longMin]);
 
-  const onFinish = useCallback((r: Resultado) => {
-    if (!r.ganaste) reproducirMelodiaTriste();
-    setRacha((prev) => (r.ganaste ? prev + 1 : 0));
-    setResultado(r);
-
-    if (r.ganaste) {
-      updateScore();
-      saveCoinBalance(readCoinBalance() + 100);
-      setScreen("end");
-    } else {
-      setScreen("end");
-    }
-  }, []);
-
-  const updateScore = () => {
-    const profile = JSON.parse(localStorage.getItem("user-profile") || "{}");
-    if (!profile.name) return;
+  const updateScore = useCallback(() => {
+    const profile = { name, country: playerCountry };
 
     const saved = localStorage.getItem("hangman-scores");
-    const scores = saved ? JSON.parse(saved) : [];
-    const index = scores.findIndex((s: any) => s.name === profile.name);
+    const scores: unknown = saved ? JSON.parse(saved) : [];
+    if (!Array.isArray(scores) || !scores.every(isLocalScore))
+      throw new Error("La tabla local no es válida.");
+    const index = scores.findIndex((score) => score.name === profile.name);
 
     if (index > -1) {
       scores[index].points += 1;
@@ -82,7 +88,32 @@ export default function HangmanGameWrapper() {
       });
     }
     localStorage.setItem("hangman-scores", JSON.stringify(scores));
-  };
+  }, [name, playerCountry]);
+
+  const onFinish = useCallback(
+    (r: Resultado) => {
+      if (!r.ganaste) reproducirMelodiaTriste();
+      setRacha((prev) => (r.ganaste ? prev + 1 : 0));
+      setResultado(r);
+
+      if (r.ganaste) {
+        void onWin().catch(() =>
+          setRewardError(
+            "No pudimos guardar las monedas de esta victoria. Revisa tu conexión.",
+          ),
+        );
+        try {
+          updateScore();
+        } catch {
+          setRewardError("No pudimos actualizar la tabla local de victorias.");
+        }
+        setScreen("end");
+      } else {
+        setScreen("end");
+      }
+    },
+    [onWin, updateScore],
+  );
 
   if (screen === "playing" && palabra) {
     return (
@@ -113,6 +144,11 @@ export default function HangmanGameWrapper() {
             ? "Salvaste al muñeco del ahorcado."
             : "El muñeco cayó en la lava..."}
         </p>
+        {rewardError && (
+          <p role="alert" className="text-sm text-rose-200">
+            {rewardError}
+          </p>
+        )}
         <div className="flex flex-col items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/60 px-8 py-5">
           <span className="text-xs uppercase tracking-widest text-amber-400">
             {resultado.categoria}

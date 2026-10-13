@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
-import CastleBackground from "./components/CastleBackground";
 import ConvexClientProvider from "./ConvexClientProvider";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -43,14 +42,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="es"
       className={cn(
         "h-full",
+        "bg-[#180e13]",
         "antialiased",
         geistMono.variable,
         "font-sans",
         inter.variable,
       )}
     >
-      <body className="relative isolate h-full overflow-auto bg-[#1a1033]">
-        <CastleBackground />
+      <body className="relative isolate h-full overflow-auto bg-[#180e13]">
         <ConvexClientProvider>
           <div className="relative z-10 flex min-h-full">{children}</div>
         </ConvexClientProvider>

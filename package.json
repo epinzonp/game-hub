@@ -3,23 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "dev:convex": "convex dev"
+    "dev:convex": "node scripts/dev.mjs --convex-only"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.117.3",
     "@types/canvas-confetti": "^1.9.0",
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "convex": "^1.46.0",
-    "convex-helpers": "^0.1.128",
     "lucide-react": "^1.55.0",
     "next": "16.3.3",
     "react": "19.2.8",

@@ -19,21 +19,25 @@ export default function GameEntryScreen({
       <section className="grid w-full max-w-6xl overflow-hidden rounded-[24px] border border-white/10 bg-[#241519] shadow-2xl md:grid-cols-[0.9fr_1.1fr]">
         <div className="relative min-h-64 md:min-h-[500px]">
           <Image
-            src={image}
+            src={`${image}?v=2`}
             alt=""
             fill
-            sizes="(min-width: 768px) 45vw, 100vw"
+            unoptimized
             className="object-cover"
           />
           <div
             aria-hidden="true"
-            className="absolute inset-0 bg-gradient-to-t from-[#180e13] via-[#180e13]/10 to-[#180e13]/15 md:bg-gradient-to-r md:from-transparent md:via-[#180e13]/15 md:to-[#241519]"
+            className="absolute inset-0 bg-gradient-to-b from-[#180e13]/5 via-[#180e13]/50 to-[#180e13]"
+          />
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 hidden bg-gradient-to-r from-transparent to-[#241519] md:block"
           />
           <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 md:bottom-8 md:p-10">
             <h1 className="max-w-lg text-3xl font-black leading-[0.98] tracking-[-0.035em] sm:text-4xl lg:text-5xl">
               {title}
             </h1>
-            <p className="mt-3 max-w-md text-sm leading-6 text-rose-100/80 sm:text-base">
+            <p className="mt-3 max-w-md text-sm leading-6 text-rose-50 sm:text-base">
               {description}
             </p>
           </div>

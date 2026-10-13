@@ -2,6 +2,7 @@
 
 import { useConvexConnectionState, useQuery } from "convex/react";
 import type { FunctionReturnType } from "convex/server";
+import { useSyncExternalStore } from "react";
 import { Coins, Crown, Medal } from "lucide-react";
 import { api } from "../../convex/_generated/api";
 
@@ -21,6 +22,11 @@ export default function Leaderboard() {
 function LiveLeaderboard() {
   const scores = useQuery(api.leaderboard.list, {});
   const connection = useConvexConnectionState();
+  const connected = useSyncExternalStore(
+    () => () => {},
+    () => connection.isWebSocketConnected,
+    () => false,
+  );
   return (
     <section aria-label="Clasificación de monedas" className="mt-6">
       <p
@@ -29,9 +35,9 @@ function LiveLeaderboard() {
       >
         <span
           aria-hidden="true"
-          className={`size-2 rounded-full ${connection.isWebSocketConnected ? "bg-[#fff34b] shadow-[0_0_12px_#fff34b80]" : "bg-[#b695ff]"}`}
+          className={`size-2 rounded-full ${connected ? "bg-[#fff34b] shadow-[0_0_12px_#fff34b80]" : "bg-[#b695ff]"}`}
         />
-        {connection.isWebSocketConnected
+        {connected
           ? "En vivo · Se actualiza automáticamente"
           : "Conectando · Los récords se actualizarán al reconectar"}
       </p>
