@@ -1,4 +1,13 @@
 let audioCtx: AudioContext | null = null;
+let funkGain: GainNode | null = null;
+
+function getFunkGain(ctx: AudioContext): GainNode {
+  if (!funkGain) {
+    funkGain = ctx.createGain();
+    funkGain.connect(ctx.destination);
+  }
+  return funkGain;
+}
 
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
@@ -240,6 +249,9 @@ export function reproducirRisa() {
   const ctx = getCtx();
   if (!ctx) return;
   const t0 = ctx.currentTime;
+  const master = getFunkGain(ctx);
+  master.gain.cancelScheduledValues(t0);
+  master.gain.setValueAtTime(1, t0);
 
   // Aleatoriamente decide si es funk normal o "parodia funk" (estilo más caótico/agudo)
   const esParodia = Math.random() > 0.5;
@@ -257,7 +269,7 @@ export function reproducirRisa() {
     bajoGain.gain.linearRampToValueAtTime(0, t0 + time + 0.1);
   });
 
-  bajo.connect(bajoGain).connect(ctx.destination);
+  bajo.connect(bajoGain).connect(master);
   bajo.start(t0);
   bajo.stop(t0 + 2);
 
@@ -276,10 +288,17 @@ export function reproducirRisa() {
     g.gain.setValueAtTime(0, t0 + n.t);
     g.gain.linearRampToValueAtTime(0.08, t0 + n.t + 0.01);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.t + n.d);
-    osc.connect(g).connect(ctx.destination);
+    osc.connect(g).connect(master);
     osc.start(t0 + n.t);
     osc.stop(t0 + n.t + n.d + 0.05);
   });
+}
+
+export function detenerFunkLoop() {
+  if (!audioCtx || !funkGain) return;
+  const now = audioCtx.currentTime;
+  funkGain.gain.cancelScheduledValues(now);
+  funkGain.gain.setValueAtTime(0, now);
 }
 
 export function reproducirFunkVictoria() {

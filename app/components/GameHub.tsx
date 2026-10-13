@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { reproducirFunkLoop } from "@/lib/sonido";
+import { detenerFunkLoop, reproducirFunkLoop } from "@/lib/sonido";
 import HangmanGameWrapper from "./HangmanGameWrapper";
 import Tiragol from "./Tiragol";
 import AirHockey from "./AirHockey";
@@ -10,13 +10,12 @@ import Radiotricky from "./Radiotricky";
 import PinPon from "./PinPon";
 import NoLeDesOPegale from "./NoLeDesOPegale";
 
-type GameId = "hangman" | "tiragol" | "airhockey" | "botecolor" | "pinpon" | "radiotricky" | "friends" | "store" | "noledes";
+type GameId = "hangman" | "tiragol" | "airhockey" | "botecolor" | "pinpon" | "radiotricky" | "friends" | "store" | "noledes" | null;
 
 export default function GameHub() {
   const [currentGame, setCurrentGame] = useState<GameId>(null);
   const [daysLeft, setDaysLeft] = useState(10);
-  const [musicaActiva, setMusicaActiva] = useState(true);
-  const [tiempoMusica, setTiempoMusica] = useState(0);
+  const [musicaActiva, setMusicaActiva] = useState(false);
 
   const handleGameSelect = (game: GameId) => {
     if (game === "store" || game === "friends") {
@@ -52,18 +51,12 @@ export default function GameHub() {
 
   useEffect(() => {
     if (currentGame !== null || !musicaActiva) return;
-    const interval = setInterval(() => {
-      reproducirFunkLoop();
-      setTiempoMusica(prev => prev + 2);
-    }, 2000);
-    return () => clearInterval(interval);
+    const interval = setInterval(reproducirFunkLoop, 2000);
+    return () => {
+      clearInterval(interval);
+      detenerFunkLoop();
+    };
   }, [currentGame, musicaActiva]);
-
-  useEffect(() => {
-    if (tiempoMusica >= 180) {
-      setTiempoMusica(0);
-    }
-  }, [tiempoMusica]);
 
   if (currentGame === "hangman") {
     return <HangmanGameWrapper onBack={() => setCurrentGame(null)} />;
@@ -160,7 +153,13 @@ export default function GameHub() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-12 p-6 text-center bg-gradient-to-br from-yellow-500 via-blue-500 to-red-500 relative">
       <button 
-        onClick={() => setMusicaActiva(!musicaActiva)}
+        aria-pressed={musicaActiva}
+        onClick={() => {
+          const activar = !musicaActiva;
+          if (activar) reproducirFunkLoop();
+          else detenerFunkLoop();
+          setMusicaActiva(activar);
+        }}
         className="absolute top-6 left-6 bg-black/40 hover:bg-black/60 text-white px-4 py-2 rounded-full text-sm font-bold transition-all backdrop-blur-sm border border-white/20"
       >
         {musicaActiva ? "Apagar música" : "Encender música"}
