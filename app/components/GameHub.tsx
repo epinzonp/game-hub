@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
@@ -227,15 +228,18 @@ export default function GameHub({
   initialAvatar,
   initialCoins,
   onSignOut,
+  startInStore = false,
 }: {
   name: string;
   country: string;
   initialAvatar: string | null;
   initialCoins: number;
   onSignOut: () => void;
+  startInStore?: boolean;
 }) {
+  const router = useRouter();
   const [currentGame, setCurrentGame] = useState<GameId>(
-    initialAvatar ? null : "store",
+    startInStore || !initialAvatar ? "store" : null,
   );
   const [daysLeft, setDaysLeft] = useState(10);
   const [musicaActiva, setMusicaActiva] = useState(false);
@@ -243,12 +247,11 @@ export default function GameHub({
   const [selectedCube, setSelectedCube] = useState<string | null>(
     normalizeAvatarId(initialAvatar),
   );
+  const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
 
   const handleGameSelect = (game: GameId) => {
     if (game === "store") {
-      setCoins(parseInt(localStorage.getItem("user-coins") || "0", 10));
-      setSelectedCube(normalizeAvatarId(localStorage.getItem("user-cube")));
-      setCurrentGame(game);
+      router.push("/store");
       return;
     }
     if (game === "friends") {
@@ -343,11 +346,28 @@ export default function GameHub({
   }
 
   if (currentGame === "store") {
+    const buyAvatar = (avatarId: string) => {
+      const avatar = avatarById[avatarId as keyof typeof avatarById];
+      if (!avatar) return;
+      if (coins < avatar.price) {
+        alert("No tienes suficientes monedas");
+        return;
+      }
+      localStorage.setItem("user-cube", avatar.id);
+      const nextCoins = avatar.price > 0 ? coins - avatar.price : coins;
+      if (avatar.price > 0) {
+        localStorage.setItem("user-coins", nextCoins.toString());
+        setCoins(nextCoins);
+      }
+      setSelectedCube(avatar.id);
+      setPreviewAvatar(null);
+    };
+
     return (
       <div className="min-h-screen w-full bg-[#170d12] text-white">
         <header className="flex min-h-20 items-center justify-between border-b border-white/10 bg-[#241318] px-5 sm:px-10">
           <button
-            onClick={() => setCurrentGame(null)}
+            onClick={() => router.push("/")}
             disabled={!selectedCube}
             className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f5ee23] disabled:cursor-not-allowed disabled:opacity-40"
           >
@@ -432,24 +452,7 @@ export default function GameHub({
                     key={avatar.id}
                     type="button"
                     aria-pressed={selected}
-                    onClick={() => {
-                      if (coins < avatar.price) {
-                        alert("No tienes suficientes monedas");
-                        return;
-                      }
-                      localStorage.setItem("user-cube", avatar.id);
-                      const nextCoins =
-                        avatar.price > 0 ? coins - avatar.price : coins;
-                      if (avatar.price > 0) {
-                        localStorage.setItem(
-                          "user-coins",
-                          nextCoins.toString(),
-                        );
-                        setCoins(nextCoins);
-                      }
-                      setSelectedCube(avatar.id);
-                      alert(`Has elegido el avatar ${avatar.name}`);
-                    }}
+                    onClick={() => setPreviewAvatar(avatar.id)}
                     className={`group relative flex min-h-48 flex-col items-start justify-between overflow-hidden rounded-2xl bg-[#28161c] p-4 text-left transition duration-200 hover:-translate-y-1 hover:bg-[#382027] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] sm:min-h-56 sm:p-5 ${selected ? "ring-2 ring-[#fff34b]" : ""}`}
                   >
                     <span className="absolute right-4 top-4 rounded-full bg-black/30 px-2.5 py-1 text-xs font-bold tabular-nums text-[#fff34b]">
@@ -493,6 +496,46 @@ export default function GameHub({
             </div>
           </section>
         </main>
+        {previewAvatar && avatarById[previewAvatar as keyof typeof avatarById] && (
+          <div className="fixed inset-0 z-50 grid place-items-center bg-[#10090d]/80 p-4 backdrop-blur-sm">
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="avatar-preview-title"
+              className="relative w-full max-w-md rounded-3xl border border-white/15 bg-[#241519] p-6 text-center shadow-2xl"
+            >
+              <button
+                type="button"
+                onClick={() => setPreviewAvatar(null)}
+                className="absolute right-4 top-4 rounded-full px-3 py-1 text-xl text-white/60 hover:bg-white/10 hover:text-white"
+                aria-label="Cerrar vista previa"
+              >
+                ×
+              </button>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#fff34b]">
+                Vista previa
+              </p>
+              <h2 id="avatar-preview-title" className="mt-2 text-3xl font-black">
+                {avatarById[previewAvatar as keyof typeof avatarById].name}
+              </h2>
+              <div className="mx-auto my-5 grid size-64 place-items-center rounded-3xl bg-[#180e13] p-4">
+                <AvatarPortrait id={previewAvatar} size={240} className="size-full object-contain" />
+              </div>
+              <button
+                type="button"
+                onClick={() => buyAvatar(previewAvatar)}
+                disabled={selectedCube === previewAvatar}
+                className="min-h-12 w-full rounded-xl bg-[#fff34b] px-5 font-black text-[#180e13] transition hover:bg-[#fff877] disabled:cursor-default disabled:opacity-60"
+              >
+                {selectedCube === previewAvatar
+                  ? "Avatar seleccionado"
+                  : avatarById[previewAvatar as keyof typeof avatarById].price === 0
+                    ? "Elegir gratis"
+                    : `Comprar por ${avatarById[previewAvatar as keyof typeof avatarById].price.toLocaleString("es-CO")} monedas`}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

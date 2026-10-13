@@ -1,6 +1,7 @@
 "use client";
 import GameHub from "@/app/components/GameHub";
 import UserProfileModal from "@/app/components/UserProfileModal";
+import { useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
 
 const profileKey = "user-profile";
@@ -48,7 +49,8 @@ function subscribeToProfile(onChange: () => void) {
   };
 }
 
-export default function Home() {
+export function GameHubShell({ startInStore = false }: { startInStore?: boolean }) {
+  const router = useRouter();
   const savedProfile = useSyncExternalStore(
     subscribeToProfile,
     getSavedProfile,
@@ -73,6 +75,7 @@ export default function Home() {
       JSON.stringify({ name: data.name.trim(), country: data.country }),
     );
     window.dispatchEvent(new Event(profileChangeEvent));
+    if (!startInStore) router.push("/store");
   };
 
   const handleSignOut = () => {
@@ -89,6 +92,7 @@ export default function Home() {
           initialAvatar={avatar}
           initialCoins={coins}
           onSignOut={handleSignOut}
+          startInStore={startInStore}
         />
       ) : (
         <main className="min-h-screen">
@@ -97,4 +101,8 @@ export default function Home() {
       ))}
     </div>
   );
+}
+
+export default function Home() {
+  return <GameHubShell />;
 }
