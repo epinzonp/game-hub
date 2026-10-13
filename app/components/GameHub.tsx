@@ -140,39 +140,13 @@ function AvatarPortrait({
   const avatar = id ? avatarById[id as keyof typeof avatarById] : undefined;
   if (!avatar) return <span className={className}>?</span>;
   return (
-    <svg
-      viewBox="0 0 100 100"
+    <Image
+      src={`/avatars/${avatar.id}.webp`}
+      alt={avatar.name}
       width={size}
       height={size}
-      role="img"
-      aria-label={avatar.name}
       className={className}
-    >
-      <defs>
-        <radialGradient id={`avatar-bg-${avatar.id}`} cx="35%" cy="25%">
-          <stop stopColor={avatar.tier === "starter" ? "#235b9c" : "#563078"} />
-          <stop offset="1" stopColor="#1b1019" />
-        </radialGradient>
-        <linearGradient id={`avatar-metal-${avatar.id}`} x2="0" y2="1">
-          <stop stopColor="#fff8bf" />
-          <stop offset=".45" stopColor="#f7cf55" />
-          <stop offset="1" stopColor="#a84438" />
-        </linearGradient>
-      </defs>
-      <rect width="100" height="100" rx="22" fill={`url(#avatar-bg-${avatar.id})`} />
-      <circle cx="50" cy="51" r="38" fill="none" stroke="#fff34b" strokeOpacity=".2" strokeWidth="1.5" />
-      <path d="M17 89c3-19 15-27 33-27s30 8 33 27" fill="#23151d" stroke="#fff34b" strokeOpacity=".35" strokeWidth="2" />
-      {avatar.id === "starter-fox" && <><path d="m25 43 4-27 22 20 20-20 5 28-7 23H32z" fill="#f28b43" stroke="#ffd16c" strokeWidth="2"/><path d="m30 24 15 14-15-4zm39 0L54 38l15-4z" fill="#8fdfff"/><path d="M35 50q15-13 30 0v13q-15 14-30 0z" fill="#ffe1b3"/><path d="m44 52 6 5 6-5" fill="none" stroke="#30202a" strokeWidth="3"/><path d="M32 43q18-11 36 0" fill="none" stroke="#42d5ff" strokeWidth="5"/></>}
-      {avatar.id === "neon-raccoon" && <><path d="m28 42 1-19 17 12 9 0 17-12 1 20-6 24H34z" fill="#777483" stroke="#c6b4ff" strokeWidth="2"/><path d="M29 47q10-12 21-2 11-10 21 2l-4 10H33z" fill="#20202c"/><path d="M37 49h7m12 0h7" stroke="#62f4eb" strokeWidth="4" strokeLinecap="round"/><path d="M38 61q12 8 24 0" fill="none" stroke="#ff5cb8" strokeWidth="3"/><path d="M30 35h40" stroke="#ff5cb8" strokeWidth="4"/></>}
-      {avatar.id === "astro-cat" && <><circle cx="50" cy="50" r="32" fill="#a9b5c9" fillOpacity=".2" stroke="#8deaff" strokeWidth="3"/><path d="m30 46 2-21 17 15 18-15 3 23-6 20H36z" fill="#b8c5d7" stroke="#e4f3ff" strokeWidth="2"/><path d="m36 50 8 2m12 0 8-2" stroke="#af72ff" strokeWidth="4" strokeLinecap="round"/><path d="m44 61 6 4 6-4" fill="none" stroke="#4bdfff" strokeWidth="2.5"/><circle cx="73" cy="30" r="2" fill="#fff34b"/><circle cx="25" cy="36" r="1.5" fill="#fff"/></>}
-      {avatar.id === "cyber-gecko" && <><path d="M25 55q0-28 25-28t25 28q0 23-25 23T25 55" fill="#8ad94f" stroke="#d7ff82" strokeWidth="2"/><ellipse cx="37" cy="43" rx="9" ry="12" fill="#e9ff94"/><ellipse cx="63" cy="43" rx="9" ry="12" fill="#e9ff94"/><circle cx="38" cy="44" r="4" fill="#182333"/><circle cx="62" cy="44" r="4" fill="#182333"/><path d="M38 63q12 8 24 0" fill="none" stroke="#266b56" strokeWidth="3"/><path d="m28 55-8 8m52-8 8 8M34 70l-7 7m39-7 7 7" stroke="#59e7df" strokeWidth="3" strokeLinecap="round"/></>}
-      {avatar.id === "shadow-raven" && <><path d="m28 63 5-29 12 12 6-24 8 24 14-13-1 33-13 13H39z" fill="#343143" stroke="#bd8cff" strokeWidth="2"/><path d="m50 53 23 4-21 13z" fill="#9862d8"/><path d="m40 48 8 2m8-2 8-2" stroke="#fff34b" strokeWidth="3" strokeLinecap="round"/><path d="M37 69q13 7 26-1" fill="none" stroke="#e2c8ff" strokeWidth="2"/><circle cx="23" cy="33" r="2" fill="#fff34b"/><circle cx="76" cy="28" r="2" fill="#fff34b"/></>}
-      {avatar.id === "magma-dragon" && <><path d="m29 44-10-22 24 12 8-18 9 18 23-11-10 26v17L50 80 29 66z" fill="#30242e" stroke="#ff7b43" strokeWidth="3"/><path d="m31 23 10 12-13-4m34 4 10-11 3 9z" fill="#ff7138"/><path d="M36 51h9m10 0h9" stroke="#ffdc6c" strokeWidth="4" strokeLinecap="round"/><path d="m42 65 8 5 8-5" fill="none" stroke="#ff8c42" strokeWidth="3"/><path d="M23 72q-9-8-3-17m57 18q9-8 3-17" fill="none" stroke="#ff572e" strokeWidth="3"/></>}
-      {avatar.id === "cosmic-wolf" && <><path d="m26 49 3-27 20 15 22-15 3 29-8 22H34z" fill="#334c76" stroke="#72d9ff" strokeWidth="2"/><path d="m30 28 14 12-12-4m37-8L55 40l12-4z" fill="#83d7ff"/><path d="m36 49 9 2m10 0 9-2" stroke="#8cf5ff" strokeWidth="4" strokeLinecap="round"/><path d="m42 62 8 12 8-12z" fill="#a9dafa"/><circle cx="39" cy="38" r="1.5" fill="#fff34b"/><circle cx="62" cy="32" r="2" fill="#fff"/><circle cx="70" cy="67" r="1.5" fill="#fff34b"/></>}
-      {avatar.id === "aurora-koi" && <><path d="M20 54q12-28 40-20 15 4 21 19-10 16-29 17-20 0-32-16l-9 9 2-18z" fill="#f2f0e9" stroke="#8ef7f1" strokeWidth="2"/><path d="M42 38q15-10 21 4-2 13-18 12-12-7-3-16zm10 24q9-10 20-4-7 13-20 4z" fill="#ff814f"/><circle cx="68" cy="49" r="2.5" fill="#251925"/><path d="M82 53q10-9 9-17m-10 19q10 8 11 17" fill="none" stroke="#b68aff" strokeWidth="3" strokeLinecap="round"/><path d="M29 38q-8-12-5-18m2 41q-11 6-12 14" fill="none" stroke="#70e2e7" strokeWidth="3" strokeLinecap="round"/></>}
-      {avatar.id === "celestial-knight" && <><path d="m30 31 20-13 20 13 6 26-11 22H35L24 57z" fill="#a9a8be" stroke="#fff0a0" strokeWidth="2.5"/><path d="m34 38 16-10 16 10-3 9H37z" fill="#4c3d68"/><path d="M36 52h28l-4 8H40z" fill="#fff34b"/><path d="m50 18 0-9m-20 23-7-6m47 6 7-6" stroke="#fff34b" strokeWidth="3" strokeLinecap="round"/><path d="M41 67h18" stroke="#7df4ff" strokeWidth="3" strokeLinecap="round"/></>}
-      {avatar.id === "avatar-67" && <><path d="m27 43 5-22 18 12 18-12 5 22-7 29H34z" fill="#241b38" stroke="#fff34b" strokeWidth="2.5"/><path d="M34 48q8-10 16-1 8-9 16 1v9H34z" fill="#12101a"/><path d="M40 51h5m10 0h5" stroke="#5af6ff" strokeWidth="3" strokeLinecap="round"/><text x="50" y="75" textAnchor="middle" fill="#fff34b" fontSize="25" fontWeight="1000" fontFamily="Arial Black, sans-serif" stroke="#8f42ff" strokeWidth="1.2" paintOrder="stroke">67</text><path d="m23 30-7-5m61 4 6-7M25 76l-5 5m59-6 5 5" stroke="#fff34b" strokeWidth="2.5" strokeLinecap="round"/></>}
-    </svg>
+    />
   );
 }
 
