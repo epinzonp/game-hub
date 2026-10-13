@@ -12,6 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://game-hub-epinzonp.vercel.app"),
   title: {
     default: "GAMEHUB | Juegos casuales para jugar en familia",
     template: "%s | GAMEHUB",
@@ -20,18 +21,33 @@ export const metadata: Metadata = {
   description:
     "Descubre juegos casuales para jugar, competir y divertirte en familia.",
   openGraph: {
-    title: "GAMEHUB",
+    title: "GAMEHUB | Juegos casuales para jugar en familia",
     description:
       "Descubre juegos casuales para jugar, competir y divertirte en familia.",
     siteName: "GAMEHUB",
     locale: "es_CO",
     type: "website",
+    images: [
+      {
+        url: "/social-card.png",
+        width: 1200,
+        height: 630,
+        type: "image/png",
+        alt: "GAME HUB: juegos casuales con Fox Pilot y 67 Phantom.",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
-    title: "GAMEHUB",
+    card: "summary_large_image",
+    title: "GAMEHUB | Juegos casuales para jugar en familia",
     description:
       "Descubre juegos casuales para jugar, competir y divertirte en familia.",
+    images: [
+      {
+        url: "/social-card.png",
+        alt: "GAME HUB: juegos casuales con Fox Pilot y 67 Phantom.",
+      },
+    ],
   },
   robots: { index: true, follow: true },
 };
