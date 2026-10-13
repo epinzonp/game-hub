@@ -17,7 +17,7 @@ Game Hub brings a collection of casual games together so visitors can choose a g
 ## Capabilities and Constraints
 
 - The hub includes solo and multiplayer game experiences, a friends entry, and an avatar shop.
-- Players sign up and log in with a unique nickname and a four-digit PIN; their browser remembers the session. No email or external authentication provider is required. Convex stores their profile, coin balance, selected avatar, and highest balance. Preserve the existing avatar catalog, costs, and 100-coin Hangman reward.
+- Players sign up and log in with a unique nickname and a four-digit PIN; their browser remembers the session. No email or external authentication provider is required. Convex stores their profile, coin balance, selected avatar, and highest balance. The avatar shop has 12 choices: 1 free starter, 3 normal avatars at 1,000 coins, 4 rare avatars at 3,000, and 4 legendary avatars at 5,000. Prices use the 100-coin Hangman win as an earn-rate reference (10, 30, and 50 wins); they are a starting model to evaluate with play data, not a proven universal price table.
 - `/leaderboard` shows the live top ten coin records with a podium and ranking rows. The landing header links to it; the store does not show leaderboard records. Spending coins never lowers a record. Players return to the same database-backed profile after sign-in. Existing guest progress can be transferred once by explicit choice. Game victories remain client-reported.
 - This redesign changes the landing page, game thumbnails, and shop presentation. Existing game experiences remain unchanged.
 

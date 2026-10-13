@@ -95,11 +95,29 @@ const avatarById = Object.fromEntries(
 );
 const tierLabels: Record<string, string> = {
   starter: "Inicial",
+  normal: "Normal",
   rare: "Raro",
-  epic: "Épico",
   legendary: "Legendario",
-  mythic: "Mítico",
 };
+const avatarRows = [
+  {
+    label: "Gratis y normales",
+    className: "avatar-card-normal",
+    avatars: avatars.filter(
+      (avatar) => avatar.tier === "starter" || avatar.tier === "normal",
+    ),
+  },
+  {
+    label: "Raros",
+    className: "avatar-card-rare",
+    avatars: avatars.filter((avatar) => avatar.tier === "rare"),
+  },
+  {
+    label: "Legendarios",
+    className: "avatar-card-legendary",
+    avatars: avatars.filter((avatar) => avatar.tier === "legendary"),
+  },
+];
 
 function AvatarPortrait({
   id,
@@ -114,7 +132,7 @@ function AvatarPortrait({
   if (!avatar) return <span className={className}>?</span>;
   return (
     <Image
-      src={`/avatars/${avatar.id}.webp`}
+      src={`/avatars/${avatar.image ?? `${avatar.id}.webp`}`}
       alt={avatar.name}
       width={size}
       height={size}
@@ -454,8 +472,8 @@ export default function GameHub({
             </div>
             <div className="relative min-h-56 md:min-h-full">
               <Image
-                src="/game-covers/cover-8.webp"
-                alt="Un avatar rodeado de monedas y objetos brillantes"
+                src="/store-banner.webp"
+                alt="Dos personajes celebran entre monedas y cristales"
                 fill
                 sizes="(max-width: 768px) 100vw, 45vw"
                 className="object-cover object-center"
@@ -498,57 +516,70 @@ export default function GameHub({
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-              {avatars.map((avatar) => {
-                const selected = selectedCube === avatar.id;
-                return (
-                  <button
-                    key={avatar.id}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => setPreviewAvatar(avatar.id)}
-                    className={`group relative flex min-h-48 flex-col items-start justify-between overflow-hidden rounded-2xl bg-[#28161c] p-4 text-left transition duration-200 hover:-translate-y-1 hover:bg-[#382027] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] sm:min-h-56 sm:p-5 ${selected ? "ring-2 ring-[#fff34b]" : ""}`}
-                  >
-                    <span className="absolute right-4 top-4 rounded-full bg-black/30 px-2.5 py-1 text-xs font-bold tabular-nums text-[#fff34b]">
-                      {ownedAvatarIds.has(avatar.id) ? (
-                        "Lo tienes"
-                      ) : avatar.price === 0 ? (
-                        "Gratis"
-                      ) : (
-                        <span className="inline-flex items-center gap-1">
-                          <Coins className="size-3.5" aria-hidden="true" />
-                          {avatar.price.toLocaleString("es-CO")}
-                        </span>
-                      )}
-                    </span>
-                    {selected && (
-                      <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-[#fff34b] px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-[#241318]">
-                        <Check className="size-3" aria-hidden="true" />
-                        Elegido
-                      </span>
-                    )}
-                    <span
-                      className={`avatar-tier-${avatar.tier} ${avatar.id === "avatar-67" ? "avatar-ultimate" : ""} mt-9 grid size-20 place-items-center overflow-hidden rounded-2xl bg-[#45262e] shadow-[0_10px_30px_rgba(0,0,0,0.22)] transition group-hover:scale-105 sm:size-24 ${selected ? "ring-2 ring-[#fff34b]" : ""}`}
-                    >
-                      <AvatarPortrait
-                        id={avatar.id}
-                        size={96}
-                        className="avatar-portrait size-full object-cover"
-                      />
-                    </span>
-                    <span className="mt-5 flex w-full items-center justify-between gap-2">
-                      <span className="truncate text-lg font-extrabold sm:text-xl">
-                        {avatar.name}
-                      </span>
-                      <span className="shrink-0 text-[10px] font-black uppercase tracking-wider text-white/45">
-                        {avatar.id === "avatar-67"
-                          ? "Ultra 67"
-                          : tierLabels[avatar.tier]}
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="space-y-8">
+              {avatarRows.map((row) => (
+                <section
+                  key={row.label}
+                  aria-label={`Avatares ${row.label.toLowerCase()}`}
+                >
+                  <h3 className="mb-3 text-sm font-black uppercase tracking-[0.16em] text-white/55">
+                    {row.label}
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+                    {row.avatars.map((avatar) => {
+                      const selected = selectedCube === avatar.id;
+                      return (
+                        <button
+                          key={avatar.id}
+                          type="button"
+                          aria-pressed={selected}
+                          onClick={() => setPreviewAvatar(avatar.id)}
+                          className={`group ${row.className} relative flex min-h-48 cursor-pointer flex-col items-start justify-between overflow-hidden rounded-2xl bg-[#28161c] p-4 text-left transition duration-200 hover:-translate-y-1 hover:bg-[#382027] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] sm:min-h-56 sm:p-5 ${selected ? "ring-2 ring-[#fff34b]" : ""}`}
+                        >
+                          <span className="absolute right-4 top-4 rounded-full bg-black/30 px-2.5 py-1 text-xs font-bold tabular-nums text-[#fff34b]">
+                            {ownedAvatarIds.has(avatar.id) ? (
+                              "Lo tienes"
+                            ) : avatar.price === 0 ? (
+                              "Gratis"
+                            ) : (
+                              <span className="inline-flex items-center gap-1">
+                                <Coins
+                                  className="size-3.5"
+                                  aria-hidden="true"
+                                />
+                                {avatar.price.toLocaleString("es-CO")}
+                              </span>
+                            )}
+                          </span>
+                          {selected && (
+                            <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-[#fff34b] px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-[#241318]">
+                              <Check className="size-3" aria-hidden="true" />
+                              Elegido
+                            </span>
+                          )}
+                          <span
+                            className={`avatar-tier-${avatar.tier} ${avatar.id === "avatar-67" ? "avatar-ultimate" : ""} mt-9 grid size-20 place-items-center overflow-hidden rounded-2xl bg-[#45262e] shadow-[0_10px_30px_rgba(0,0,0,0.22)] transition group-hover:scale-105 sm:size-24 ${selected ? "ring-2 ring-[#fff34b]" : ""}`}
+                          >
+                            <AvatarPortrait
+                              id={avatar.id}
+                              size={96}
+                              className="avatar-portrait size-full object-cover"
+                            />
+                          </span>
+                          <span className="mt-5 flex w-full items-center justify-between gap-2">
+                            <span className="truncate text-lg font-extrabold sm:text-xl">
+                              {avatar.name}
+                            </span>
+                            <span className="shrink-0 text-[10px] font-black uppercase tracking-wider text-white/45">
+                              {tierLabels[avatar.tier]}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+              ))}
             </div>
           </section>
         </main>

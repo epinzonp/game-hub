@@ -11,7 +11,10 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { isGameRoute, shouldConfirmGameExit } from "@/lib/game-routes";
+import {
+  isPointEnabledGameRoute,
+  shouldConfirmGameExit,
+} from "@/lib/game-routes";
 
 const GameNavigationContext = createContext<((href: string) => void) | null>(
   null,
@@ -34,7 +37,9 @@ export default function GameNavigationGuard({
   const [pendingBack, setPendingBack] = useState(false);
   const allowUnload = useRef(false);
   const allowBack = useRef(false);
-  const inGame = pathname ? isGameRoute(pathname) : false;
+  const inPointEnabledGame = pathname
+    ? isPointEnabledGameRoute(pathname)
+    : false;
 
   const requestNavigation = useCallback(
     (href: string) => {
@@ -58,7 +63,7 @@ export default function GameNavigationGuard({
   );
 
   useEffect(() => {
-    if (!inGame || !pathname) return;
+    if (!inPointEnabledGame || !pathname) return;
 
     const gameUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     const gameHistoryState = window.history.state;
@@ -132,7 +137,7 @@ export default function GameNavigationGuard({
       window.removeEventListener("popstate", interceptHistory, true);
       window.removeEventListener("beforeunload", confirmBeforeUnload);
     };
-  }, [inGame, pathname]);
+  }, [inPointEnabledGame, pathname]);
 
   const confirmNavigation = () => {
     if (!pendingHref) return;

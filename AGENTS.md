@@ -18,8 +18,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Game routes and scoring
 
 - Give every playable game its own stable route under `/games/<game-id>`. Keep hub launch buttons, direct links, and browser navigation aligned with the game ID.
-- Keep an unfinished game's points in memory only. Persist or award points only after the game reaches its completed result. Leaving an unfinished game through an in-app link, the hub control, browser back, or page unload must show a blocking confirmation that says the current run's points will be lost.
+- Keep an unfinished game's points in memory only. Persist or award points only after the game reaches its completed result. Show the existing lost-points confirmation only for games listed in `pointEnabledGameRouteIds` in `lib/game-routes.ts`, when leaving through an in-app link, the hub control, browser back, or browser forward. Games without points must navigate without this dialog. Keep the route list, game mechanics, and docs in sync when enabling points for a game; use one confirmation dialog for supported navigation.
 - Use [docs/README.md](docs/README.md) as the developer and agent documentation gateway. Keep a guide in `docs/games/` for every playable game, covering its goal, mechanics, controls, completion conditions, and score persistence; add and update the guide and game index whenever a game is added or its mechanics change.
+
+## Store economy
+
+- Use clear, fixed cosmetic price tiers calibrated to this game's coin-earning rate and expected play effort. Keep early unlocks attainable and reserve very expensive items for optional long-term goals; do not treat another game's prices as universal benchmarks.
+- Keep exactly 12 avatars: 1 free starter, 3 normal at 1,000 coins each (10 Hangman wins), 4 rare at 3,000 each (30 wins), and 4 legendary at 5,000 each (50 wins), based on the 100-coin Hangman reward. Apply the same tier price consistently, including to Ronaldo 7 and 67 Phantom. This is a testable starting economy, not a proven universal price table; adjust only using this game's play data and player feedback.
+- Evidence caveat: a 14-million-player field experiment on virtual-currency quantity discounts found little change in purchaser conversion and cautioned that its results may not generalize. It did not test earn-to-unlock price tiers in a kids' casual game, so it supports testing the economy rather than copying a supposedly proven price table ([Levitt et al., PNAS 2016](https://pmc.ncbi.nlm.nih.gov/articles/PMC4941432/)).
 
 ## What this page is
 

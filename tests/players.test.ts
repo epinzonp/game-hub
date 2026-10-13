@@ -9,18 +9,48 @@ import { avatars } from "../lib/avatars";
 const modules = import.meta.glob("../convex/**/*.ts");
 const profile = { name: "Ana", country: "Colombia", pin: "4826" };
 
-test("Ronaldo 7 is available as a premium 75,000-coin avatar", () => {
+test("Ronaldo 7 and Messi 10 are 5,000-coin legendary avatars with artwork", () => {
   expect(avatars.find((avatar) => avatar.id === "ronaldo-7")).toMatchObject({
     name: "Ronaldo 7",
-    price: 75000,
+    tier: "legendary",
+    price: 5000,
   });
-  expect(
-    existsSync(
-      fileURLToPath(
-        new URL("../public/avatars/ronaldo-7.webp", import.meta.url),
+  expect(avatars.find((avatar) => avatar.id === "royal-phoenix")).toMatchObject(
+    {
+      name: "Messi 10",
+      tier: "legendary",
+      price: 5000,
+    },
+  );
+  for (const avatar of avatars.filter((avatar) => avatar.image)) {
+    expect(
+      existsSync(
+        fileURLToPath(
+          new URL(`../public/avatars/${avatar.image}`, import.meta.url),
+        ),
       ),
-    ),
-  ).toBe(true);
+    ).toBe(true);
+  }
+});
+
+test("keeps the free and 3/4/4 cosmetic tiers at their earn-rate prices", () => {
+  expect(avatars.filter((avatar) => avatar.tier === "starter")).toHaveLength(1);
+  expect(avatars.filter((avatar) => avatar.tier === "normal")).toHaveLength(3);
+  expect(avatars.filter((avatar) => avatar.tier === "rare")).toHaveLength(4);
+  expect(avatars.filter((avatar) => avatar.tier === "legendary")).toHaveLength(
+    4,
+  );
+  expect(avatars.find((avatar) => avatar.tier === "starter")?.price).toBe(0);
+  expect(
+    avatars.filter((avatar) => avatar.tier === "normal").map((a) => a.price),
+  ).toEqual([1000, 1000, 1000]);
+  expect(
+    avatars.filter((avatar) => avatar.tier === "rare").map((a) => a.price),
+  ).toEqual([3000, 3000, 3000, 3000]);
+  expect(
+    avatars.filter((avatar) => avatar.tier === "legendary").map((a) => a.price),
+  ).toEqual([5000, 5000, 5000, 5000]);
+  expect(avatars.find((avatar) => avatar.id === "avatar-67")?.price).toBe(5000);
 });
 
 async function account(t: ReturnType<typeof convexTest>, name = "Ana") {
@@ -146,7 +176,7 @@ test("treats a legacy current avatar as owned and equips other owned avatars fre
 test("purchases use server prices, concurrent rewards add up, and spending preserves the maximum", async () => {
   const t = convexTest(schema, modules);
   const ana = await account(t);
-  for (let i = 0; i < 4; i++) await t.mutation(api.players.awardWin, ana);
+  for (let i = 0; i < 9; i++) await t.mutation(api.players.awardWin, ana);
   await Promise.all([
     t.mutation(api.players.awardWin, ana),
     t.mutation(api.players.awardWin, ana),
@@ -169,7 +199,7 @@ test("purchases use server prices, concurrent rewards add up, and spending prese
   });
   const saved = await t.query(api.players.me, ana);
   expect(saved?.coins).toBe(100);
-  expect(saved?.maxCoins).toBe(600);
+  expect(saved?.maxCoins).toBe(1100);
   expect(saved?.avatar).toBe("neon-raccoon");
   expect(saved?.ownedAvatars).toEqual(["starter-fox", "neon-raccoon"]);
   await expect(

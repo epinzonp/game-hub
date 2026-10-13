@@ -15,6 +15,8 @@ test("offers only affordable avatars, including the free option at zero coins", 
   expect(choices(0)).toContain("Fox Pilot");
   expect(choices(0)).toContain("Elegir gratis");
   expect(choices(0)).not.toContain("Neon Raccoon");
-  expect(choices(500)).toContain("Neon Raccoon");
-  expect(choices(500)).not.toContain("Astro Cat");
+  expect(choices(999)).not.toContain("Neon Raccoon");
+  expect(choices(1000)).toContain("Neon Raccoon");
+  expect(choices(1000)).toContain("Astro Cat");
+  expect(choices(1000)).toContain("Cyber Gecko");
 });

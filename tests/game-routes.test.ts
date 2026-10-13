@@ -17,7 +17,12 @@ test("only leaving a game route needs the unfinished-points warning", () => {
   expect(isGameRoute("/games/hangman")).toBe(true);
   expect(isGameRoute("/")).toBe(false);
   expect(shouldConfirmGameExit("/games/hangman", "/")).toBe(true);
-  expect(shouldConfirmGameExit("/games/hangman", "/games/tiragol")).toBe(true);
+  expect(shouldConfirmGameExit("/games/tiragol", "/")).toBe(true);
+  expect(shouldConfirmGameExit("/games/noledes", "/")).toBe(true);
+  expect(shouldConfirmGameExit("/games/airhockey", "/")).toBe(true);
+  expect(shouldConfirmGameExit("/games/pinpon", "/")).toBe(true);
+  expect(shouldConfirmGameExit("/games/radiotricky", "/")).toBe(true);
+  expect(shouldConfirmGameExit("/games/botecolor", "/")).toBe(false);
   expect(shouldConfirmGameExit("/games/hangman", "/games/hangman")).toBe(false);
   expect(shouldConfirmGameExit("/", "/games/hangman")).toBe(false);
 });

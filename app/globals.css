@@ -73,8 +73,51 @@
 }
 
 .avatar-tier-rare {
-  color: #62d8ff;
-  box-shadow: inset 0 0 16px #62d8ff30;
+  color: #c084fc;
+  box-shadow: inset 0 0 16px #a64dff44;
+}
+
+.avatar-card-normal {
+  border: 1px solid #ffffff12;
+}
+
+.avatar-card-rare {
+  border: 1px solid #b46cff88;
+  background-image: linear-gradient(145deg, #762d9a55, transparent 72%);
+  box-shadow: 0 0 18px #a64dff44;
+}
+
+.avatar-card-rare:hover {
+  box-shadow: 0 0 26px #a64dff88;
+}
+
+.avatar-card-legendary {
+  border: 1px solid #ffd45a99;
+  background-image:
+    radial-gradient(circle, #fff0b477 0 1px, transparent 3px),
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 17px,
+      #ffd45a20 17px 18px,
+      transparent 18px 35px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 17px,
+      #ffd45a20 17px 18px,
+      transparent 18px 35px
+    ),
+    linear-gradient(145deg, #a76b1455, transparent 72%);
+  background-size:
+    46px 46px,
+    36px 36px,
+    36px 36px,
+    auto;
+  box-shadow: 0 0 18px #ffbd3e55;
+}
+
+.avatar-card-legendary:hover {
+  box-shadow: 0 0 28px #ffd45a99;
 }
 
 .avatar-tier-epic {

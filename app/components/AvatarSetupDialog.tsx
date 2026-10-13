@@ -29,7 +29,7 @@ export function AvatarSetupChoices({
             className="flex min-h-44 flex-col items-center gap-3 rounded-2xl border border-white/10 bg-[#180e13] p-4 font-bold transition hover:border-[#fff34b] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] disabled:opacity-60"
           >
             <Image
-              src={`/avatars/${avatar.id}.webp`}
+              src={`/avatars/${avatar.image ?? `${avatar.id}.webp`}`}
               alt=""
               width={96}
               height={96}
