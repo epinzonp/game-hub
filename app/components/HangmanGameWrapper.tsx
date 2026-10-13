@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import HangmanGame, { type Resultado } from "./HangmanGame";
 import HangmanLeaderboard from "./HangmanLeaderboard";
 import GameEntryScreen from "./GameEntryScreen";
+import { useGameProgress } from "./GameNavigationGuard";
 import { PALABRAS, type Palabra } from "@/lib/palabras";
 import { reproducirMelodiaTriste } from "@/lib/sonido";
 
@@ -61,6 +62,7 @@ export default function HangmanGameWrapper({
   const [racha, setRacha] = useState(0);
   const [rewardError, setRewardError] = useState("");
   const dificultad = dificultadDeRacha(racha);
+  useGameProgress(screen === "playing");
 
   const jugar = useCallback(() => {
     setRewardError("");
