@@ -19,6 +19,18 @@ import {
 const GameNavigationContext = createContext<((href: string) => void) | null>(
   null,
 );
+const GameProgressContext = createContext<
+  ((inProgress: boolean | null) => void) | null
+>(null);
+
+export function useGameProgress(inProgress: boolean) {
+  const reportProgress = useContext(GameProgressContext);
+  if (!reportProgress) throw new Error("GameNavigationGuard is missing.");
+  useEffect(() => {
+    reportProgress(inProgress);
+    return () => reportProgress(null);
+  }, [inProgress, reportProgress]);
+}
 
 export function useGameNavigation() {
   const navigate = useContext(GameNavigationContext);
@@ -35,6 +47,22 @@ export default function GameNavigationGuard({
   const pathname = usePathname();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
   const [pendingBack, setPendingBack] = useState(false);
+  const [progress, setProgress] = useState<{
+    pathname: string | null;
+    inProgress: boolean;
+  } | null>(null);
+  const reportProgress = useCallback(
+    (inProgress: boolean | null) => {
+      setProgress(inProgress === null ? null : { pathname, inProgress });
+      if (inProgress === false) {
+        setPendingHref(null);
+        setPendingBack(false);
+      }
+    },
+    [pathname],
+  );
+  const inProgress =
+    progress?.pathname === pathname ? progress.inProgress : true;
   const allowUnload = useRef(false);
   const allowBack = useRef(false);
   const inPointEnabledGame = pathname
@@ -44,7 +72,9 @@ export default function GameNavigationGuard({
   const requestNavigation = useCallback(
     (href: string) => {
       const destination = new URL(href, window.location.href);
-      if (shouldConfirmGameExit(pathname ?? "", destination.pathname)) {
+      if (
+        shouldConfirmGameExit(pathname ?? "", destination.pathname, inProgress)
+      ) {
         setPendingBack(false);
         setPendingHref(
           destination.origin === window.location.origin
@@ -59,11 +89,11 @@ export default function GameNavigationGuard({
         window.location.assign(destination.href);
       }
     },
-    [pathname, router],
+    [pathname, router, inProgress],
   );
 
   useEffect(() => {
-    if (!inPointEnabledGame || !pathname) return;
+    if (!inPointEnabledGame || !inProgress || !pathname) return;
 
     const gameUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     const gameHistoryState = window.history.state;
@@ -137,7 +167,7 @@ export default function GameNavigationGuard({
       window.removeEventListener("popstate", interceptHistory, true);
       window.removeEventListener("beforeunload", confirmBeforeUnload);
     };
-  }, [inPointEnabledGame, pathname]);
+  }, [inPointEnabledGame, inProgress, pathname]);
 
   const confirmNavigation = () => {
     if (!pendingHref) return;
@@ -163,7 +193,9 @@ export default function GameNavigationGuard({
 
   return (
     <GameNavigationContext.Provider value={requestNavigation}>
-      {children}
+      <GameProgressContext.Provider value={reportProgress}>
+        {children}
+      </GameProgressContext.Provider>
       <Dialog.Root
         open={pendingHref !== null}
         disablePointerDismissal

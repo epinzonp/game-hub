@@ -33,6 +33,10 @@ export function isPointEnabledGameRoute(pathname: string) {
   );
 }
 
-export function shouldConfirmGameExit(fromPath: string, toPath: string) {
-  return isPointEnabledGameRoute(fromPath) && fromPath !== toPath;
+export function shouldConfirmGameExit(
+  fromPath: string,
+  toPath: string,
+  inProgress = true,
+) {
+  return inProgress && isPointEnabledGameRoute(fromPath) && fromPath !== toPath;
 }
