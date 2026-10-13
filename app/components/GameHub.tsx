@@ -1,6 +1,20 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Coins,
+  Gamepad2,
+  Music2,
+  ShoppingBag,
+  UsersRound,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { detenerFunkLoop, reproducirFunkLoop } from "@/lib/sonido";
 import HangmanGameWrapper from "./HangmanGameWrapper";
 import Tiragol from "./Tiragol";
@@ -10,21 +24,101 @@ import Radiotricky from "./Radiotricky";
 import PinPon from "./PinPon";
 import NoLeDesOPegale from "./NoLeDesOPegale";
 
-type GameId = "hangman" | "tiragol" | "airhockey" | "botecolor" | "pinpon" | "radiotricky" | "friends" | "store" | "noledes" | null;
+type GameId =
+  | "hangman"
+  | "tiragol"
+  | "airhockey"
+  | "botecolor"
+  | "pinpon"
+  | "radiotricky"
+  | "friends"
+  | "store"
+  | "noledes"
+  | null;
+
+const games = [
+  {
+    id: "hangman",
+    title: "El Ahorcado",
+    description: "Adivina la palabra antes de que el muñeco caiga en la lava.",
+    image: "/game-covers/cover-0.webp",
+    label: "Palabras",
+  },
+  {
+    id: "tiragol",
+    title: "Tiragol",
+    description: "Apunta, dispara y busca tu mejor récord de goles.",
+    image: "/game-covers/cover-1.webp",
+    label: "Deportes",
+  },
+  {
+    id: "noledes",
+    title: "No Le Des o Pégale",
+    description: "¡Rápido! Pégale a los muñecos antes de que se escondan.",
+    image: "/game-covers/cover-2.webp",
+    label: "Reflejos",
+  },
+  {
+    id: "airhockey",
+    title: "Hockey de Aire",
+    description: "Desliza el disco y vence a la IA o a un amigo.",
+    image: "/game-covers/cover-3.webp",
+    label: "Deportes",
+  },
+  {
+    id: "botecolor",
+    title: "Botecolor",
+    description: "Organiza los colores en las botellas.",
+    image: "/game-covers/cover-4.webp",
+    label: "Rompecabezas",
+  },
+  {
+    id: "pinpon",
+    title: "Pin Pon",
+    description: "Rebota la pelota, aguanta el ritmo y gana.",
+    image: "/game-covers/cover-5.webp",
+    label: "Deportes",
+  },
+  {
+    id: "radiotricky",
+    title: "Radiotricky",
+    description: "Tres en Raya con onda. VS amigo o IA.",
+    image: "/game-covers/cover-6.webp",
+    label: "Estrategia",
+  },
+] as const;
+
+const cubes = [
+  { emoji: "😊", name: "Feliz", price: 0 },
+  { emoji: "😢", name: "Triste", price: 500 },
+  { emoji: "😡", name: "Enojado", price: 1000 },
+  { emoji: "😱", name: "Susto", price: 2000 },
+  { emoji: "😎", name: "Cool", price: 5000 },
+  { emoji: "😴", name: "Sueño", price: 10000 },
+  { emoji: "67", name: "Misterioso 67", price: 25000 },
+];
 
 export default function GameHub() {
   const [currentGame, setCurrentGame] = useState<GameId>(null);
   const [daysLeft, setDaysLeft] = useState(10);
   const [musicaActiva, setMusicaActiva] = useState(false);
+  const [coins, setCoins] = useState(0);
+  const [selectedCube, setSelectedCube] = useState<string | null>(null);
 
   const handleGameSelect = (game: GameId) => {
-    if (game === "store" || game === "friends") {
+    if (game === "store") {
+      setCoins(parseInt(localStorage.getItem("user-coins") || "0", 10));
+      setSelectedCube(localStorage.getItem("user-cube"));
+      setCurrentGame(game);
+      return;
+    }
+    if (game === "friends") {
       setCurrentGame(game);
       return;
     }
     if (!localStorage.getItem("user-cube")) {
       alert("Antes de empezar tienes que ir a la tienda y escoger el avatar");
-      setCurrentGame("store");
+      handleGameSelect("store");
       return;
     }
     setCurrentGame(game);
@@ -38,15 +132,11 @@ export default function GameHub() {
       localStorage.setItem("next-game-date", targetDate.toISOString());
     }
 
-    const calculateDays = () => {
-      const now = new Date();
-      const next = new Date(localStorage.getItem("next-game-date") || "");
-      const diffTime = next.getTime() - now.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      setDaysLeft(diffDays > 0 ? diffDays : 0);
-    };
-
-    calculateDays();
+    const next = new Date(localStorage.getItem("next-game-date") || "");
+    const diffDays = Math.floor(
+      (next.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+    );
+    setDaysLeft(diffDays > 0 ? diffDays : 0);
   }, []);
 
   useEffect(() => {
@@ -61,27 +151,21 @@ export default function GameHub() {
   if (currentGame === "hangman") {
     return <HangmanGameWrapper onBack={() => setCurrentGame(null)} />;
   }
-  
   if (currentGame === "tiragol") {
     return <Tiragol onBack={() => setCurrentGame(null)} />;
   }
-
   if (currentGame === "noledes") {
     return <NoLeDesOPegale onBack={() => setCurrentGame(null)} />;
   }
-
   if (currentGame === "airhockey") {
     return <AirHockey onBack={() => setCurrentGame(null)} />;
   }
-
   if (currentGame === "botecolor") {
     return <Botecolor onBack={() => setCurrentGame(null)} />;
   }
-
   if (currentGame === "pinpon") {
     return <PinPon onBack={() => setCurrentGame(null)} />;
   }
-
   if (currentGame === "radiotricky") {
     return <Radiotricky onBack={() => setCurrentGame(null)} />;
   }
@@ -89,214 +173,356 @@ export default function GameHub() {
   if (currentGame === "friends") {
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-zinc-900 text-white">
-        <h1 className="text-6xl font-black italic">MODO <span className="text-blue-500">AMIGOS</span></h1>
-        <p className="text-xl text-zinc-400">Pronto podrás jugar contra tus amigos en tiempo real.</p>
-        <button onClick={() => setCurrentGame(null)} className="rounded-xl bg-blue-600 px-8 py-3 font-bold hover:bg-blue-500">Volver al Hub</button>
+        <h1 className="text-6xl font-black italic">
+          MODO <span className="text-blue-500">AMIGOS</span>
+        </h1>
+        <p className="text-xl text-zinc-400">
+          Pronto podrás jugar contra tus amigos en tiempo real.
+        </p>
+        <button
+          onClick={() => setCurrentGame(null)}
+          className="rounded-xl bg-blue-600 px-8 py-3 font-bold hover:bg-blue-500"
+        >
+          Volver al Hub
+        </button>
       </div>
     );
   }
 
   if (currentGame === "store") {
-    const coins = parseInt(localStorage.getItem("user-coins") || "0");
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-zinc-900 text-white relative">
-        <div className="absolute top-8 right-8 bg-zinc-800 px-4 py-2 rounded-full border border-amber-600 flex items-center gap-2 shadow-lg">
-          <span className="text-2xl">💰</span>
-          <span className="text-xl font-bold text-amber-400">{coins}</span>
-        </div>
-        <div className="flex flex-col items-center gap-2">
-          <h1 className="text-6xl font-black italic">TIENDA DE <span className="text-amber-500">CUBITOS</span></h1>
-        </div>
-         <div className="grid grid-cols-3 gap-6">
-           {[
-             { emoji: "😊", name: "Feliz", price: 0 },
-             { emoji: "😢", name: "Triste", price: 500 },
-             { emoji: "😡", name: "Enojado", price: 1000 },
-             { emoji: "😱", name: "Susto", price: 2000 },
-             { emoji: "😎", name: "Cool", price: 5000 },
-             { emoji: "😴", name: "Sueño", price: 10000 },
-             { emoji: "67", name: "Misterioso 67", price: 25000 },
-           ].map((cube) => (
-             <div 
-               key={cube.name} 
-               className="flex flex-col items-center gap-2 p-6 rounded-2xl bg-zinc-800 border-2 border-transparent hover:border-amber-500 cursor-pointer transition-all hover:scale-105"
-               onClick={() => {
-                 if (coins >= cube.price) {
-                   localStorage.setItem("user-cube", cube.emoji);
-                   if (cube.price > 0) {
-                     localStorage.setItem("user-coins", (coins - cube.price).toString());
-                   }
-                   alert(`Has elegido el cubito ${cube.name}`);
-                 } else {
-                   alert("No tienes suficientes monedas");
-                 }
-               }}
-             >
-               <div className={`text-6xl p-4 rounded-lg shadow-inner ${cube.emoji === "67" ? "bg-blue-600 text-white font-bold" : "bg-zinc-700"}`}>
-                 {cube.emoji}
-               </div>
-               <span className="font-bold">{cube.name}</span>
-               <span className="text-sm text-amber-400">{cube.price === 0 ? "Gratis" : `💰 ${cube.price}`}</span>
-             </div>
-           ))}
-         </div>
-         <button 
-           onClick={() => setCurrentGame(null)} 
-           className="flex items-center gap-2 rounded-xl bg-amber-600 px-8 py-3 font-bold hover:bg-amber-500 transition-all"
-         >
-           <span className="text-xl -translate-y-0.5">←</span> Volver al Hub
-         </button>
+      <div className="min-h-screen w-full bg-[#170d12] text-white">
+        <header className="flex min-h-20 items-center justify-between border-b border-white/10 bg-[#241318] px-5 sm:px-10">
+          <button
+            onClick={() => setCurrentGame(null)}
+            className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f5ee23]"
+          >
+            <ArrowRight className="size-4 rotate-180" aria-hidden="true" />
+            Volver al hub
+          </button>
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#392126] px-4 py-2 font-extrabold tabular-nums text-[#fff34b]">
+            <Coins className="size-5" aria-hidden="true" />
+            {coins.toLocaleString("es-CO")}
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-[1440px] px-5 pb-16 pt-10 sm:px-10 sm:pt-14">
+          <section className="relative mb-12 grid min-h-[260px] overflow-hidden rounded-[20px] bg-[#391923] md:grid-cols-[1.1fr_0.9fr]">
+            <div className="relative z-10 flex flex-col items-start justify-center p-7 sm:p-10 lg:p-14">
+              <h1 className="max-w-xl text-4xl font-black leading-[0.98] tracking-[-0.035em] sm:text-6xl">
+                Un cubito. <span className="text-[#fff34b]">Tu estilo.</span>
+              </h1>
+              <p className="mt-5 max-w-md text-base leading-7 text-rose-100/75 sm:text-lg">
+                Elige el avatar que te acompaña en cada partida.
+              </p>
+            </div>
+            <div className="relative min-h-56 md:min-h-full">
+              <Image
+                src="/game-covers/cover-8.webp"
+                alt="Un cubito rodeado de monedas y objetos brillantes"
+                fill
+                sizes="(max-width: 768px) 100vw, 45vw"
+                className="object-cover object-center"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#391923] via-[#391923]/35 to-transparent md:bg-gradient-to-l md:from-transparent md:via-transparent md:to-[#391923]" />
+              {selectedCube && (
+                <div className="absolute bottom-5 right-5 flex items-center gap-3 rounded-xl bg-[#1a1014]/90 px-4 py-3 shadow-xl">
+                  <span className="text-xs font-bold uppercase tracking-[0.12em] text-white/65">
+                    Tu cubito
+                  </span>
+                  <span
+                    className="text-3xl"
+                    aria-label={`Avatar ${selectedCube}`}
+                  >
+                    {selectedCube}
+                  </span>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section aria-labelledby="cubes-heading">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h2
+                  id="cubes-heading"
+                  className="text-3xl font-black tracking-[-0.03em] sm:text-4xl"
+                >
+                  Elige tu cubito
+                </h2>
+                <p className="mt-2 text-sm text-rose-100/65 sm:text-base">
+                  Escoge uno para desbloquear tus juegos.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-sm font-semibold text-white/55">
+                <Check className="size-4 text-[#fff34b]" aria-hidden="true" />
+                {selectedCube
+                  ? "Tu elección queda guardada"
+                  : "Tu primer cubito es gratis"}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+              {cubes.map((cube) => {
+                const selected = selectedCube === cube.emoji;
+                return (
+                  <button
+                    key={cube.name}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => {
+                      if (coins < cube.price) {
+                        alert("No tienes suficientes monedas");
+                        return;
+                      }
+                      localStorage.setItem("user-cube", cube.emoji);
+                      const nextCoins =
+                        cube.price > 0 ? coins - cube.price : coins;
+                      if (cube.price > 0) {
+                        localStorage.setItem(
+                          "user-coins",
+                          nextCoins.toString(),
+                        );
+                        setCoins(nextCoins);
+                      }
+                      setSelectedCube(cube.emoji);
+                      alert(`Has elegido el cubito ${cube.name}`);
+                    }}
+                    className={`group relative flex min-h-48 flex-col items-start justify-between overflow-hidden rounded-2xl bg-[#28161c] p-4 text-left transition duration-200 hover:-translate-y-1 hover:bg-[#382027] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] sm:min-h-56 sm:p-5 ${selected ? "ring-2 ring-[#fff34b]" : ""}`}
+                  >
+                    <span className="absolute right-4 top-4 rounded-full bg-black/30 px-2.5 py-1 text-xs font-bold tabular-nums text-[#fff34b]">
+                      {cube.price === 0 ? (
+                        "Gratis"
+                      ) : (
+                        <span className="inline-flex items-center gap-1">
+                          <Coins className="size-3.5" aria-hidden="true" />
+                          {cube.price.toLocaleString("es-CO")}
+                        </span>
+                      )}
+                    </span>
+                    {selected && (
+                      <span className="absolute left-4 top-4 inline-flex items-center gap-1 rounded-full bg-[#fff34b] px-2.5 py-1 text-[11px] font-black uppercase tracking-wide text-[#241318]">
+                        <Check className="size-3" aria-hidden="true" />
+                        Elegido
+                      </span>
+                    )}
+                    <span
+                      className={`mt-9 grid size-20 place-items-center rounded-2xl text-5xl shadow-[0_10px_30px_rgba(0,0,0,0.22)] transition group-hover:scale-105 sm:size-24 sm:text-6xl ${cube.emoji === "67" ? "bg-[#5c47cb] font-black text-white" : "bg-[#45262e]"}`}
+                    >
+                      {cube.emoji}
+                    </span>
+                    <span className="mt-5 text-lg font-extrabold sm:text-xl">
+                      {cube.name}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-12 p-6 text-center bg-gradient-to-br from-yellow-500 via-blue-500 to-red-500 relative">
-      <button 
-        aria-pressed={musicaActiva}
-        onClick={() => {
-          const activar = !musicaActiva;
-          if (activar) reproducirFunkLoop();
-          else detenerFunkLoop();
-          setMusicaActiva(activar);
-        }}
-        className="absolute top-6 left-6 bg-black/40 hover:bg-black/60 text-white px-4 py-2 rounded-full text-sm font-bold transition-all backdrop-blur-sm border border-white/20"
+    <div className="min-h-screen w-full bg-[#180e13] text-white selection:bg-[#fff34b] selection:text-[#180e13]">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-[#241519]">
+        <nav
+          aria-label="Navegación principal"
+          className="mx-auto flex min-h-[72px] max-w-[1600px] items-center gap-6 px-4 sm:px-8"
+        >
+          <a
+            href="#inicio"
+            className="shrink-0 text-xl font-black uppercase tracking-[-0.045em] sm:text-2xl"
+          >
+            Game<span className="text-[#fff34b]">Hub</span>
+          </a>
+          <div className="hidden items-center gap-6 text-sm font-bold text-white/70 md:flex">
+            <a className="transition hover:text-white" href="#inicio">
+              Descubrir
+            </a>
+            <a className="transition hover:text-white" href="#juegos">
+              Juegos
+            </a>
+            <a className="transition hover:text-white" href="#extras">
+              Más
+            </a>
+          </div>
+          <a
+            href="#juegos"
+            className="ml-auto hidden h-11 max-w-[430px] flex-1 items-center gap-3 rounded-full border border-white/15 bg-white/[0.06] px-4 text-sm text-white/50 transition hover:border-white/30 hover:text-white/75 md:flex"
+          >
+            <Gamepad2 className="size-[18px]" aria-hidden="true" />
+            ¿A qué jugamos hoy?
+          </a>
+          <button
+            onClick={() => handleGameSelect("friends")}
+            className="hidden items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-sm font-bold transition hover:bg-white/15 sm:inline-flex"
+          >
+            <UsersRound className="size-4" aria-hidden="true" />
+            Amigos
+          </button>
+          <label className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-full bg-[#351e24] px-3 py-2 text-xs font-bold text-white/85 md:ml-0 sm:gap-3 sm:px-4 sm:text-sm">
+            <Music2
+              className="hidden size-4 text-[#fff34b] sm:block"
+              aria-hidden="true"
+            />
+            <span className="hidden sm:inline">Música</span>
+            <VolumeX
+              className={`size-4 transition ${musicaActiva ? "text-white/35" : "text-[#fff34b]"}`}
+              aria-hidden="true"
+            />
+            <Switch
+              checked={musicaActiva}
+              onCheckedChange={(checked) => {
+                if (checked) reproducirFunkLoop();
+                else detenerFunkLoop();
+                setMusicaActiva(checked);
+              }}
+              aria-label={musicaActiva ? "Apagar música" : "Encender música"}
+              className="data-checked:bg-[#fff34b] data-unchecked:bg-white/25"
+            />
+            <Volume2
+              className={`size-4 transition ${musicaActiva ? "text-[#fff34b]" : "text-white/35"}`}
+              aria-hidden="true"
+            />
+          </label>
+          <button
+            onClick={() => handleGameSelect("store")}
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[#fff34b] text-[#23151a] transition hover:bg-[#fff877] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:h-11 sm:w-auto sm:gap-2 sm:rounded-full sm:px-5 sm:text-sm sm:font-black"
+            aria-label="Ir a la tienda"
+          >
+            <ShoppingBag className="size-[18px]" aria-hidden="true" />
+            <span className="hidden sm:inline">Tienda</span>
+          </button>
+        </nav>
+      </header>
+
+      <main
+        id="inicio"
+        className="mx-auto max-w-[1600px] px-4 pb-12 pt-7 sm:px-8 sm:pt-10"
       >
-        {musicaActiva ? "Apagar música" : "Encender música"}
-      </button>
-      <div className="absolute bottom-4 right-6 text-white/60 text-sm font-medium italic">
-        por: ernesto pinzon
-      </div>
-      <div>
-        <h1 className="text-7xl font-black tracking-tight text-white">
-          GAME <span className="text-amber-500">HUB</span>
-        </h1>
-        <p className="mt-3 text-zinc-400">Selecciona un juego para comenzar</p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <button
-            onClick={() => handleGameSelect("hangman")}
-            className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+        <section
+          className="border-b border-white/10 pb-6"
+          aria-labelledby="intro-heading"
+        >
+          <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#fff34b]">
+            Un mundo de juegos para compartir
+          </p>
+          <h1
+            id="intro-heading"
+            className="mt-2 text-3xl font-black tracking-[-0.04em] sm:text-5xl"
           >
-            <div className="relative z-10">
-              <h3 className="text-2xl font-bold text-white">El Ahorcado</h3>
-              <p className="mt-2 text-sm text-zinc-400">Adivina la palabra antes de que el muñeco caiga en la lava.</p>
-            </div>
-            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-              😵
-            </div>
-          </button>
- 
-          <button
-            onClick={() => handleGameSelect("tiragol")}
-            className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-          >
-            <div className="relative z-10">
-              <h3 className="text-2xl font-bold text-white">Tiragol</h3>
-              <p className="mt-2 text-sm text-zinc-400">¡Lanza el balón y marca el mejor récord de goles!</p>
-            </div>
-            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-              ⚽
-            </div>
-          </button>
+            ¿A qué jugamos hoy?
+          </h1>
+          <p className="mt-2 text-sm text-rose-100/65 sm:text-base">
+            Retos cortos para reír, pensar y jugar en familia.
+          </p>
+        </section>
 
-          <button
-            onClick={() => handleGameSelect("noledes")}
-            className="group relative overflow-hidden rounded-2xl border border-red-800 bg-zinc-900 p-8 transition-all hover:border-red-500 hover:bg-zinc-800"
-          >
-            <div className="relative z-10">
-              <h3 className="text-2xl font-bold text-white">No Le Des o Pegale</h3>
-              <p className="mt-2 text-sm text-zinc-400">¡Rápido! Pégale a los muñecos antes de que se escondan.</p>
-            </div>
-            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-              🔨
-            </div>
-          </button>
- 
-          <button
-            onClick={() => handleGameSelect("airhockey")}
-            className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-          >
-            <div className="relative z-10">
-              <h3 className="text-2xl font-bold text-white">Hockey de Aire</h3>
-              <p className="mt-2 text-sm text-zinc-400">Desliza el disco y vence a la IA o a un amigo.</p>
-            </div>
-            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-              🏒
-            </div>
-          </button>
-
-
-         <button
-           onClick={() => handleGameSelect("botecolor")}
-           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-         >
-          <div className="relative z-10">
-            <h3 className="text-2xl font-bold text-white">Botecolor</h3>
-            <p className="mt-2 text-sm text-zinc-400">Organiza los colores en las botellas.</p>
+        <section
+          id="juegos"
+          className="scroll-mt-24 pt-7 sm:pt-9"
+          aria-labelledby="games-heading"
+        >
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <h2
+              id="games-heading"
+              className="text-3xl font-black tracking-[-0.035em] sm:text-4xl"
+            >
+              Juegos para descubrir
+            </h2>
           </div>
-          <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-            🎨
-          </div>
-        </button>
 
-         <button
-           onClick={() => handleGameSelect("pinpon")}
-           className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
-         >
-          <div className="relative z-10">
-            <h3 className="text-2xl font-bold text-white">Pin Pon</h3>
-            <p className="mt-2 text-sm text-zinc-400">¡Rápido y divertido! Rebota la pelota y gana.</p>
+          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:-mx-8 sm:gap-5 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 xl:grid-cols-4">
+            {games.map((game) => (
+              <button
+                key={game.id}
+                type="button"
+                onClick={() => handleGameSelect(game.id)}
+                className="group w-[82vw] shrink-0 snap-start text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b] sm:w-[46vw] lg:w-auto"
+              >
+                <span className="relative block aspect-[16/9] overflow-hidden rounded-[14px] bg-[#321a20]">
+                  <Image
+                    src={game.image}
+                    alt=""
+                    fill
+                    sizes="(max-width: 640px) 82vw, (max-width: 1024px) 46vw, 25vw"
+                    className="object-cover transition duration-300 group-hover:scale-[1.045]"
+                  />
+                  <span className="absolute left-3 top-3 rounded-full bg-[#1b1116]/85 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.12em] text-white shadow-sm">
+                    {game.label}
+                  </span>
+                  <span className="absolute bottom-3 right-3 grid size-10 translate-y-1 place-items-center rounded-full bg-[#fff34b] text-[#241318] opacity-0 shadow-lg transition duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
+                    <ArrowUpRight className="size-5" aria-hidden="true" />
+                  </span>
+                </span>
+                <span className="mt-3 block text-xl font-extrabold tracking-[-0.02em] transition group-hover:text-[#fff34b]">
+                  {game.title}
+                </span>
+                <span className="mt-1 block text-sm leading-5 text-rose-100/60">
+                  {game.description}
+                </span>
+              </button>
+            ))}
           </div>
-          <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-            🏓
-          </div>
-        </button>
+        </section>
 
+        <section
+          id="extras"
+          className="scroll-mt-24 grid gap-4 pt-14 sm:pt-16 lg:grid-cols-[1.4fr_0.6fr]"
+          aria-label="Más para descubrir"
+        >
           <button
-            onClick={() => handleGameSelect("radiotricky")}
-            className="group relative overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+            onClick={() => handleGameSelect("store")}
+            className="group relative flex min-h-60 overflow-hidden rounded-[18px] bg-[#3c1d28] text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b]"
           >
-           <div className="relative z-10">
-             <h3 className="text-2xl font-bold text-white">Radiotricky</h3>
-             <p className="mt-2 text-sm text-zinc-400">Tres en Raya con onda. VS Amigo o IA.</p>
-           </div>
-           <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-             📻
-           </div>
-         </button>
-
-          <button
-            onClick={() => setCurrentGame("friends")}
-            className="group relative overflow-hidden rounded-2xl border border-blue-800 bg-zinc-900 p-8 transition-all hover:border-blue-500 hover:bg-zinc-800"
-          >
-            <div className="relative z-10">
-              <h3 className="text-2xl font-bold text-white">Amigos</h3>
-              <p className="mt-2 text-sm text-zinc-400">¡Reta a tus amigos y demuestra quién es el mejor!</p>
+            <div className="relative z-10 flex w-[65%] flex-col items-start justify-center p-6 sm:p-9">
+              <h2 className="max-w-sm text-3xl font-black leading-[1.02] tracking-[-0.035em] sm:text-4xl">
+                Dale personalidad a tu partida.
+              </h2>
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-[#fff34b]">
+                Explorar la tienda{" "}
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </span>
             </div>
-            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-              👥
+            <div className="absolute inset-y-0 right-0 w-[58%]">
+              <Image
+                src="/game-covers/cover-8.webp"
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 60vw, 35vw"
+                className="object-cover transition duration-300 group-hover:scale-[1.04]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#3c1d28] via-[#3c1d28]/40 to-transparent" />
             </div>
           </button>
-
           <button
-            onClick={() => setCurrentGame("store")}
-            className="group relative overflow-hidden rounded-2xl border border-amber-800 bg-zinc-900 p-8 transition-all hover:border-amber-500 hover:bg-zinc-800"
+            onClick={() => handleGameSelect("friends")}
+            className="group flex min-h-60 flex-col justify-between rounded-[18px] bg-[#291a32] p-6 text-left transition hover:bg-[#372343] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b] sm:p-8"
           >
-            <div className="relative z-10">
-              <h3 className="text-2xl font-bold text-white">Tienda</h3>
-              <p className="mt-2 text-sm text-zinc-400">Elige tu cubito y personaliza tu avatar.</p>
-            </div>
-            <div className="absolute -right-4 -bottom-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity">
-              🛒
-            </div>
+            <UsersRound className="size-8 text-[#d49bff]" aria-hidden="true" />
+            <span>
+              <span className="block text-2xl font-black tracking-[-0.025em]">
+                ¿Quién se apunta?
+              </span>
+              <span className="mt-2 block text-sm leading-6 text-purple-100/65">
+                El modo para jugar con amigos está en camino.
+              </span>
+              <span className="mt-4 inline-flex items-center gap-2 text-sm font-black text-[#d49bff]">
+                Ver modo amigos{" "}
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </span>
+            </span>
           </button>
+        </section>
 
-        <div className="rounded-2xl border border-dashed border-zinc-800 bg-zinc-900/30 p-8 flex items-center justify-center text-zinc-600 italic">
-           Próximo juego... en {daysLeft} días
-        </div>
-      </div>
+        <section className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-rose-100/55 sm:flex-row sm:items-center sm:justify-between">
+          <p>Próximo juego en {daysLeft} días</p>
+          <p>por: ernesto pinzon</p>
+        </section>
+      </main>
     </div>
   );
 }

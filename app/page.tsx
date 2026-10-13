@@ -4,8 +4,10 @@ import UserProfileModal from "@/app/components/UserProfileModal";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-
-  const [profile, setProfile] = useState<{ name: string; country: string } | null>(null);
+  const [profile, setProfile] = useState<{
+    name: string;
+    country: string;
+  } | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("user-profile");
@@ -20,7 +22,7 @@ export default function Home() {
   };
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-zinc-950 text-zinc-50">
+    <main className="relative min-h-screen w-full overflow-x-hidden bg-zinc-950 text-zinc-50">
       {!profile && <UserProfileModal onSave={handleSaveProfile} />}
       <GameHub />
     </main>
