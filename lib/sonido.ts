@@ -1,26 +1,25 @@
 let audioCtx: AudioContext | null = null;
-let funkGain: GainNode | null = null;
-
-function getFunkGain(ctx: AudioContext): GainNode {
-  if (!funkGain) {
-    funkGain = ctx.createGain();
-    funkGain.connect(ctx.destination);
-  }
-  return funkGain;
-}
+let funkAudio: HTMLAudioElement | null = null;
 
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
   const Ctor =
     window.AudioContext ||
-    (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    (window as unknown as { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext;
   if (!Ctor) return null;
   if (!audioCtx) audioCtx = new Ctor();
   if (audioCtx.state === "suspended") void audioCtx.resume();
   return audioCtx;
 }
 
-function nota(c: AudioContext, frecu: number, inicio: number, duracion: number, vol = 0.18) {
+function nota(
+  c: AudioContext,
+  frecu: number,
+  inicio: number,
+  duracion: number,
+  vol = 0.18,
+) {
   const osc = c.createOscillator();
   const gain = c.createGain();
   const filtro = c.createBiquadFilter();
@@ -96,7 +95,12 @@ export function reproducirSusto() {
   filtroAlto.connect(master).connect(ctx.destination);
 
   // Vocal agonizante: dos osciladores disonantes que suben en glissando
-  const barridos: { type: OscillatorType; desde: number; hasta: number; vol: number }[] = [
+  const barridos: {
+    type: OscillatorType;
+    desde: number;
+    hasta: number;
+    vol: number;
+  }[] = [
     { type: "sawtooth", desde: 400, hasta: 1500, vol: 0.5 },
     { type: "square", desde: 430, hasta: 1650, vol: 0.4 },
     { type: "sawtooth", desde: 900, hasta: 3200, vol: 0.25 },
@@ -153,7 +157,7 @@ export function reproducirVertidoAgua() {
 
   const noise = ctx.createBufferSource();
   noise.buffer = buffer;
-  
+
   const filter = ctx.createBiquadFilter();
   filter.type = "lowpass";
   filter.frequency.setValueAtTime(1200, t0);
@@ -173,15 +177,15 @@ export function reproducirVictoria() {
   const ctx = getCtx();
   if (!ctx) return;
   const t0 = ctx.currentTime;
-  
+
   const notas = [
     { f: 523.25, t: 0.0, d: 0.1 }, // C5
     { f: 659.25, t: 0.1, d: 0.1 }, // E5
     { f: 783.99, t: 0.2, d: 0.2 }, // G5
-    { f: 1046.50, t: 0.4, d: 0.4 }, // C6
+    { f: 1046.5, t: 0.4, d: 0.4 }, // C6
   ];
 
-  notas.forEach(n => {
+  notas.forEach((n) => {
     const osc = ctx.createOscillator();
     const g = ctx.createGain();
     osc.type = "sine";
@@ -200,7 +204,7 @@ export function reproducirRisa() {
   if (!ctx) return;
 
   const t0 = ctx.currentTime;
-  
+
   const notas = [
     { f: 300, d: 0.1, t: 0.0 },
     { f: 300, d: 0.1, t: 0.2 },
@@ -210,99 +214,56 @@ export function reproducirRisa() {
     { f: 500, d: 0.1, t: 1.0 },
   ];
 
-    notas.forEach(n => {
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = "square";
-      osc.frequency.setValueAtTime(n.f, t0 + n.t);
-      
-      g.gain.setValueAtTime(0, t0 + n.t);
-      g.gain.linearRampToValueAtTime(0.1, t0 + n.t + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.t + n.d);
-      
-      osc.connect(g).connect(ctx.destination);
-      osc.start(t0 + n.t);
-      osc.stop(t0 + n.t + n.d + 0.05);
-    });
-  }
-
-  export function reproducirTicTac() {
-    const ctx = getCtx();
-    if (!ctx) return;
-    
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(800, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.05);
-    
-    gain.gain.setValueAtTime(0.1, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
-    
-    osc.connect(gain).connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.1);
-  }
-
-  export function reproducirFunkLoop() {
-  const ctx = getCtx();
-  if (!ctx) return;
-  const t0 = ctx.currentTime;
-  const master = getFunkGain(ctx);
-  master.gain.cancelScheduledValues(t0);
-  master.gain.setValueAtTime(1, t0);
-
-  // Aleatoriamente decide si es funk normal o "parodia funk" (estilo más caótico/agudo)
-  const esParodia = Math.random() > 0.5;
-  const factorTono = esParodia ? 1.5 : 1.0;
-
-  const bajo = ctx.createOscillator();
-  const bajoGain = ctx.createGain();
-  bajo.type = "square";
-  bajo.frequency.setValueAtTime(55 * factorTono, t0);
-  bajoGain.gain.setValueAtTime(0, t0);
-  
-  const ritmo = [0, 0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75];
-  ritmo.forEach((time) => {
-    bajoGain.gain.linearRampToValueAtTime(0.15, t0 + time + 0.01);
-    bajoGain.gain.linearRampToValueAtTime(0, t0 + time + 0.1);
-  });
-
-  bajo.connect(bajoGain).connect(master);
-  bajo.start(t0);
-  bajo.stop(t0 + 2);
-
-  const notasFunk = [
-    { f: 440 * factorTono, t: 0.1, d: 0.1 },
-    { f: 523 * factorTono, t: 0.3, d: 0.1 },
-    { f: 587 * factorTono, t: 0.5, d: 0.1 },
-    { f: 659 * factorTono, t: 0.7, d: 0.2 },
-  ];
-
-  notasFunk.forEach(n => {
+  notas.forEach((n) => {
     const osc = ctx.createOscillator();
     const g = ctx.createGain();
-    osc.type = esParodia ? "sawtooth" : "sine";
+    osc.type = "square";
     osc.frequency.setValueAtTime(n.f, t0 + n.t);
+
     g.gain.setValueAtTime(0, t0 + n.t);
-    g.gain.linearRampToValueAtTime(0.08, t0 + n.t + 0.01);
+    g.gain.linearRampToValueAtTime(0.1, t0 + n.t + 0.02);
     g.gain.exponentialRampToValueAtTime(0.0001, t0 + n.t + n.d);
-    osc.connect(g).connect(master);
+
+    osc.connect(g).connect(ctx.destination);
     osc.start(t0 + n.t);
     osc.stop(t0 + n.t + n.d + 0.05);
   });
 }
 
+export function reproducirTicTac() {
+  const ctx = getCtx();
+  if (!ctx) return;
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = "sine";
+  osc.frequency.setValueAtTime(800, ctx.currentTime);
+  osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.05);
+
+  gain.gain.setValueAtTime(0.1, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.1);
+
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  osc.stop(ctx.currentTime + 0.1);
+}
+
+export function reproducirFunkLoop(): Promise<void> {
+  if (typeof window === "undefined") return Promise.resolve();
+  if (!funkAudio) {
+    funkAudio = new Audio("/music/carefree.mp3");
+    funkAudio.loop = true;
+    funkAudio.volume = 0.14;
+    funkAudio.preload = "none";
+  }
+  return funkAudio.play();
+}
+
 export function detenerFunkLoop() {
-  if (!audioCtx || !funkGain) return;
-  const now = audioCtx.currentTime;
-  funkGain.gain.cancelScheduledValues(now);
-  funkGain.gain.setValueAtTime(0, now);
+  funkAudio?.pause();
 }
 
 export function reproducirFunkVictoria() {
-  reproducirFunkLoop();
+  void reproducirFunkLoop();
 }
-
-

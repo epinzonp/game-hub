@@ -140,12 +140,12 @@ export default function GameHub() {
   }, []);
 
   useEffect(() => {
-    if (currentGame !== null || !musicaActiva) return;
-    const interval = setInterval(reproducirFunkLoop, 2000);
-    return () => {
-      clearInterval(interval);
+    if (currentGame !== null || !musicaActiva) {
       detenerFunkLoop();
-    };
+      return;
+    }
+    void reproducirFunkLoop().catch(() => setMusicaActiva(false));
+    return detenerFunkLoop;
   }, [currentGame, musicaActiva]);
 
   if (currentGame === "hangman") {
@@ -375,11 +375,7 @@ export default function GameHub() {
             />
             <Switch
               checked={musicaActiva}
-              onCheckedChange={(checked) => {
-                if (checked) reproducirFunkLoop();
-                else detenerFunkLoop();
-                setMusicaActiva(checked);
-              }}
+              onCheckedChange={setMusicaActiva}
               aria-label={musicaActiva ? "Apagar música" : "Encender música"}
               className="data-checked:bg-[#fff34b] data-unchecked:bg-white/25"
             />
@@ -521,6 +517,26 @@ export default function GameHub() {
         <section className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-rose-100/55 sm:flex-row sm:items-center sm:justify-between">
           <p>Próximo juego en {daysLeft} días</p>
           <p>por: ernesto pinzon</p>
+          <p>
+            Música:{" "}
+            <a
+              className="underline underline-offset-2 hover:text-white"
+              href="https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400037"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Carefree — Kevin MacLeod
+            </a>{" "}
+            ·{" "}
+            <a
+              className="underline underline-offset-2 hover:text-white"
+              href="https://creativecommons.org/licenses/by/4.0/"
+              target="_blank"
+              rel="noreferrer"
+            >
+              CC BY 4.0
+            </a>
+          </p>
         </section>
       </main>
     </div>
