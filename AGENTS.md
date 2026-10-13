@@ -27,6 +27,8 @@ Game Hub is a Spanish-language web hub for kids and families who want quick, cas
 
 - Do not change game rules, scoring, controls, or gameplay components when working on the landing, thumbnail art, or store presentation. Check with the user before broadening that scope.
 - Keep the game IDs, launch routing, visible game catalog, and their associations with thumbnail files aligned. Store covers in `public/game-covers/`; preserve each game's identity and do not bake title text or logos into the artwork.
+- Every game's first screen must use `app/components/GameEntryScreen.tsx` with that game's existing thumbnail, Spanish title, short description, and launch or mode/difficulty controls. Keep selector screens in the same burgundy, plum, warm-white, and vivid-yellow visual language; use the selected game's thumbnail there too. Keep one shared `Volver al hub` control from `GameHub` rather than adding another inside the game.
+- When adding a game, add its catalog entry and matching cover association, then build its entry page and any mode or level selectors with `GameEntryScreen` before entering the unchanged gameplay view.
 - Keep copy in Spanish and friendly to children and families. Do not introduce competitive, mature, or monetization claims unsupported by the current product.
 - Preserve semantic headings, meaningful image alternatives where art conveys content, visible keyboard focus, adequate contrast, and sufficiently large touch targets.
 - Keep server-rendered markup deterministic. Do not branch on browser globals or generate random/time-based content during render; initialize browser-only behavior after hydration when needed.

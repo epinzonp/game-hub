@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { reproducirRisa, reproducirVictoria } from "@/lib/sonido";
 import confetti from "canvas-confetti";
+import GameEntryScreen from "./GameEntryScreen";
 
 type GameState = "aiming" | "shooting" | "result";
 type Result = "goal" | "miss" | "saved";
@@ -54,6 +55,7 @@ function FloatingSadFace() {
 }
 
 export default function Tiragol({ onBack }: { onBack: () => void }) {
+  const [started, setStarted] = useState(false);
   const [state, setState] = useState<GameState>("aiming");
   const [ballPos, setBallPos] = useState({ x: 0, y: 0 });
   const [goalPos, setGoalPos] = useState({ x: 0, y: 0 });
@@ -122,6 +124,25 @@ export default function Tiragol({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     setAttempts(a => a + 1);
   }, [result]);
+
+  if (!started) {
+    return (
+      <GameEntryScreen
+        title="Tiragol"
+        description="Apunta, dispara y busca tu mejor récord de goles."
+        image="/game-covers/cover-1.webp"
+      >
+        <h2 className="text-xl font-extrabold">Pon a prueba tu puntería</h2>
+        <p className="text-sm leading-6 text-rose-100/70">Arrastra el balón para elegir dónde disparar.</p>
+        <button
+          onClick={() => setStarted(true)}
+          className="min-h-12 rounded-xl bg-[#fff34b] px-8 py-3 text-lg font-black text-[#180e13] transition hover:bg-[#fff877] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+        >
+          ¡A tirar!
+        </button>
+      </GameEntryScreen>
+    );
+  }
 
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 p-4 text-center bg-green-900 text-white overflow-hidden">
@@ -217,12 +238,6 @@ export default function Tiragol({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
-      <button 
-        onClick={onBack}
-        className="text-sm text-zinc-400 underline hover:text-white"
-      >
-        Volver al Hub
-      </button>
     </div>
   );
 }

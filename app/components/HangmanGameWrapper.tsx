@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import HangmanGame, { type Resultado } from "./HangmanGame";
 import HangmanLeaderboard from "./HangmanLeaderboard";
+import GameEntryScreen from "./GameEntryScreen";
 import { PALABRAS, type Palabra } from "@/lib/palabras";
 import { reproducirMelodiaTriste } from "@/lib/sonido";
 
@@ -28,7 +29,7 @@ function elegirPalabra(longMin: number): Palabra {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-export default function HangmanGameWrapper({ onBack }: { onBack: () => void }) {
+export default function HangmanGameWrapper() {
   const [screen, setScreen] = useState<Screen>("hub");
   const [palabra, setPalabra] = useState<Palabra | null>(null);
   const [resultado, setResultado] = useState<Resultado | null>(null);
@@ -94,12 +95,6 @@ export default function HangmanGameWrapper({ onBack }: { onBack: () => void }) {
           dificultad={dificultad.nombre}
           racha={racha}
         />
-        <button
-          onClick={onBack}
-          className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-400 hover:bg-zinc-800"
-        >
-          Rendirse y volver al hub
-        </button>
       </div>
     );
   }
@@ -141,35 +136,24 @@ export default function HangmanGameWrapper({ onBack }: { onBack: () => void }) {
           >
             Jugar de nuevo
           </button>
-          <button
-            onClick={onBack}
-            className="rounded-xl border border-zinc-700 px-6 py-3 font-bold text-zinc-300 hover:bg-zinc-800"
-          >
-            Volver al hub
-          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-6 p-6 text-center">
-      <div className="flex flex-col items-center gap-6">
-        <div>
-          <h1 className="text-7xl font-black tracking-tight text-white">
-            EL <span className="text-amber-500">AHORCADO</span>
-          </h1>
-          <p className="mt-3 text-zinc-400">
-            Adivina la palabra antes de que el muñeco caiga en la lava.
-          </p>
-        </div>
+    <GameEntryScreen
+      title="El Ahorcado"
+      description="Adivina la palabra antes de que el muñeco caiga en la lava."
+      image="/game-covers/cover-0.webp"
+    >
+      <div className="flex flex-col items-center gap-6 text-center">
         <HangmanLeaderboard />
-      </div>
  
       <div className="flex flex-col items-center gap-3">
         <button
           onClick={jugar}
-          className="rounded-2xl bg-amber-500 px-12 py-4 text-2xl font-black text-zinc-900 shadow-lg shadow-amber-500/30 transition-transform hover:scale-105"
+          className="min-h-12 rounded-xl bg-[#fff34b] px-12 py-4 text-2xl font-black text-[#180e13] shadow-lg transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
         >
           JUGAR
         </button>
@@ -197,7 +181,7 @@ export default function HangmanGameWrapper({ onBack }: { onBack: () => void }) {
         </div>
       )}
  
-      <div className="flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-2 text-sm text-zinc-300">
+      <div className="flex flex-wrap items-center justify-center rounded-xl border border-white/10 bg-[#180e13]/65 px-4 py-3 text-sm text-rose-100/75">
         <span className="mr-2">Dificultad:</span>
         <span className="font-bold text-green-400">Fácil</span>
         <span className="mx-2 text-zinc-600">→</span>
@@ -207,6 +191,7 @@ export default function HangmanGameWrapper({ onBack }: { onBack: () => void }) {
         <span className="mx-2 text-zinc-600">→</span>
         <span className="font-bold text-red-500">Extremo</span>
       </div>
-    </div>
+      </div>
+    </GameEntryScreen>
   );
 }

@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { reproducirTicTac } from "@/lib/sonido";
+import GameEntryScreen from "./GameEntryScreen";
 
-export default function NoLeDesOPegale({ onBack }: { onBack: () => void }) {
+export default function NoLeDesOPegale() {
   const [score, setScore] = useState(0);
   const [activeHole, setActiveHole] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
@@ -56,44 +57,46 @@ export default function NoLeDesOPegale({ onBack }: { onBack: () => void }) {
 
   if (gameState === "start") {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 bg-zinc-900 text-white">
-        <h1 className="text-6xl font-black italic text-red-500">NO LE DES O PEGALE</h1>
-        <p className="text-xl text-zinc-400">¡Pégale a los muñecos que salgan de los huecos!</p>
-        
+      <GameEntryScreen
+        title="No Le Des o Pégale"
+        description="¡Pégale a los muñecos que salgan de los huecos!"
+        image="/game-covers/cover-2.webp"
+      >
         <div className="flex flex-col items-center gap-4">
-          <p className="font-bold text-zinc-300">Selecciona Dificultad:</p>
-          <div className="flex gap-2">
-            {(["facil", "medio", "dificil", "imposible"] as const).map((lvl) => (
+          <h2 className="text-xl font-extrabold">Selecciona dificultad</h2>
+          <div className="grid w-full grid-cols-2 gap-2">
+            {(
+              [
+                ["facil", "Fácil"],
+                ["medio", "Medio"],
+                ["dificil", "Difícil"],
+                ["imposible", "Imposible"],
+              ] as const
+            ).map(([lvl, label]) => (
               <button 
                 key={lvl}
                 onClick={() => setDifficulty(lvl)}
                 className={`px-4 py-2 rounded-lg font-bold capitalize transition-all ${
                   difficulty === lvl 
-                    ? "bg-red-600 text-white scale-110 shadow-lg" 
-                    : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+                    ? "bg-[#fff34b] text-[#180e13] shadow-lg"
+                    : "bg-[#392126] text-rose-100/75 hover:bg-[#4a2932]"
                 }`}
               >
-                {lvl}
+                {label}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex gap-4 mt-4">
+        <div className="mt-4 flex flex-col gap-3">
           <button 
             onClick={() => setGameState("playing")} 
-            className="rounded-xl bg-red-600 px-8 py-3 font-bold hover:bg-red-500 transition-all"
+            className="min-h-12 rounded-xl bg-[#fff34b] px-8 py-3 font-black text-[#180e13] transition hover:bg-[#fff877] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
           >
             Empezar Juego
           </button>
-          <button 
-            onClick={onBack} 
-            className="rounded-xl bg-zinc-700 px-8 py-3 font-bold hover:bg-zinc-600 transition-all"
-          >
-            Volver
-          </button>
         </div>
-      </div>
+      </GameEntryScreen>
     );
   }
 
@@ -112,12 +115,6 @@ export default function NoLeDesOPegale({ onBack }: { onBack: () => void }) {
             className="rounded-xl bg-red-600 px-8 py-3 font-bold hover:bg-red-500 transition-all"
           >
             Reintentar
-          </button>
-          <button 
-            onClick={onBack} 
-            className="rounded-xl bg-zinc-700 px-8 py-3 font-bold hover:bg-zinc-600 transition-all"
-          >
-            Volver al Hub
           </button>
         </div>
       </div>
@@ -149,12 +146,6 @@ export default function NoLeDesOPegale({ onBack }: { onBack: () => void }) {
         ))}
       </div>
 
-      <button 
-        onClick={onBack} 
-        className="mt-8 rounded-xl bg-zinc-700 px-6 py-2 font-bold hover:bg-zinc-600 transition-all"
-      >
-        Salir
-      </button>
     </div>
   );
 }

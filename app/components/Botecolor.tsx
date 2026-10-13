@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { reproducirVertidoAgua } from "@/lib/sonido";
+import GameEntryScreen from "./GameEntryScreen";
 
 type Color = string;
 type Bottle = Color[];
@@ -9,8 +10,9 @@ type Bottle = Color[];
 const COLORS = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00"]; // Rojo, Verde, Azul, Amarillo
 const MAX_CAPACITY = 4;
 
-export default function Botecolor({ onBack }: { onBack: () => void }) {
+export default function Botecolor() {
   const [level, setLevel] = useState(1);
+  const [started, setStarted] = useState(false);
   const [bottles, setBottles] = useState<Bottle[]>([]);
   const [selectedBottle, setSelectedBottle] = useState<number | null>(null);
   const [win, setWin] = useState(false);
@@ -117,6 +119,24 @@ export default function Botecolor({ onBack }: { onBack: () => void }) {
     }
   };
 
+  if (!started) {
+    return (
+      <GameEntryScreen
+        title="Botecolor"
+        description="Ordena los colores en las botellas y completa cada nivel."
+        image="/game-covers/cover-4.webp"
+      >
+        <p className="text-sm font-bold uppercase tracking-[0.12em] text-[#fff34b]">Nivel 1 · Fácil</p>
+        <button
+          onClick={() => setStarted(true)}
+          className="min-h-12 rounded-xl bg-[#fff34b] px-8 py-3 text-lg font-black text-[#180e13] transition hover:bg-[#fff877] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+        >
+          Empezar a jugar
+        </button>
+      </GameEntryScreen>
+    );
+  }
+
   return (
     <div className="flex h-screen w-screen flex-col items-center justify-center gap-12 bg-white text-white p-4 overflow-hidden relative" 
          style={{ 
@@ -176,7 +196,6 @@ export default function Botecolor({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
-      <button onClick={onBack} className="text-zinc-500 underline">Volver al Hub</button>
     </div>
   );
 }

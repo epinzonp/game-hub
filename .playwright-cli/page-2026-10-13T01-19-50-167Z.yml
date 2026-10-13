@@ -1,0 +1,82 @@
+- generic [active] [ref=f1e1]:
+  - generic [ref=f1e28]:
+    - banner [ref=f1e29]:
+      - navigation "Navegación principal" [ref=f1e132]:
+        - link "Game Hub, inicio" [ref=f1e133] [cursor=pointer]:
+          - /url: "#inicio"
+          - text: Game
+          - generic [ref=f1e138]: Hub
+        - generic [ref=f1e139]:
+          - link "Descubrir" [ref=f1e140] [cursor=pointer]:
+            - /url: "#inicio"
+          - link "Juegos" [ref=f1e141] [cursor=pointer]:
+            - /url: "#juegos"
+          - link "Más" [ref=f1e142] [cursor=pointer]:
+            - /url: "#extras"
+        - link "¿A qué jugamos hoy?" [ref=f1e143] [cursor=pointer]:
+          - /url: "#juegos"
+        - button "Amigos" [ref=f1e146]
+        - generic [ref=f1e151]:
+          - generic [ref=f1e155]: Música
+          - switch "Encender música" [ref=f1e160]
+          - checkbox [aria-hidden] [ref=f1e161]
+        - button "Ir a la tienda" [ref=f1e166]:
+          - generic [ref=f1e170]: Tienda
+        - generic [ref=f1e171]:
+          - 'img "Sesión iniciada: México" [ref=f1e172]': 😊
+          - button "Cerrar sesión de México" [ref=f1e173]: Salir
+    - main [ref=f1e42]:
+      - region [ref=f1e177]:
+        - paragraph [ref=f1e178]: Un mundo de juegos para compartir
+        - heading "¿A qué jugamos hoy?" [level=1] [ref=f1e179]
+        - paragraph [ref=f1e180]: Retos cortos para reír, pensar y jugar en familia.
+      - region [ref=f1e181]:
+        - heading "Juegos para descubrir" [level=2] [ref=f1e182]
+        - generic [ref=f1e58]:
+          - button "Palabras El Ahorcado Adivina la palabra antes de que el muñeco caiga en la lava." [ref=f1e183]:
+            - generic [ref=f1e184]: Palabras
+            - generic [ref=f1e190]: El Ahorcado
+            - generic [ref=f1e191]: Adivina la palabra antes de que el muñeco caiga en la lava.
+          - button "Deportes Tiragol Apunta, dispara y busca tu mejor récord de goles." [ref=f1e192]:
+            - generic [ref=f1e193]: Deportes
+            - generic [ref=f1e199]: Tiragol
+            - generic [ref=f1e200]: Apunta, dispara y busca tu mejor récord de goles.
+          - button "Reflejos No Le Des o Pégale ¡Rápido! Pégale a los muñecos antes de que se escondan." [ref=f1e201]:
+            - generic [ref=f1e202]: Reflejos
+            - generic [ref=f1e208]: No Le Des o Pégale
+            - generic [ref=f1e209]: ¡Rápido! Pégale a los muñecos antes de que se escondan.
+          - button "Deportes Hockey de Aire Desliza el disco y vence a la IA o a un amigo." [ref=f1e210]:
+            - generic [ref=f1e211]: Deportes
+            - generic [ref=f1e217]: Hockey de Aire
+            - generic [ref=f1e218]: Desliza el disco y vence a la IA o a un amigo.
+          - button "Rompecabezas Botecolor Organiza los colores en las botellas." [ref=f1e219]:
+            - generic [ref=f1e220]: Rompecabezas
+            - generic [ref=f1e226]: Botecolor
+            - generic [ref=f1e227]: Organiza los colores en las botellas.
+          - button "Deportes Pin Pon Rebota la pelota, aguanta el ritmo y gana." [ref=f1e228]:
+            - generic [ref=f1e229]: Deportes
+            - generic [ref=f1e235]: Pin Pon
+            - generic [ref=f1e236]: Rebota la pelota, aguanta el ritmo y gana.
+          - button "Estrategia Radiotricky Tres en Raya con onda. VS amigo o IA." [ref=f1e237]:
+            - generic [ref=f1e238]: Estrategia
+            - generic [ref=f1e244]: Radiotricky
+            - generic [ref=f1e245]: Tres en Raya con onda. VS amigo o IA.
+      - region "Más para descubrir" [ref=f1e246]:
+        - button [ref=f1e247]:
+          - generic [ref=f1e248]:
+            - heading "Dale personalidad a tu partida." [level=2] [ref=f1e249]
+            - generic [ref=f1e250]: Explorar la tienda
+        - button "¿Quién se apunta? El modo para jugar con amigos está en camino. Ver modo amigos" [ref=f1e255]:
+          - generic [ref=f1e260]:
+            - generic [ref=f1e261]: ¿Quién se apunta?
+            - generic [ref=f1e262]: El modo para jugar con amigos está en camino.
+            - generic [ref=f1e263]: Ver modo amigos
+      - generic [ref=f1e266]:
+        - paragraph [ref=f1e267]: Próximo juego en 9 días
+        - paragraph [ref=f1e268]: "por: ernesto pinzon"
+        - paragraph [ref=f1e269]:
+          - text: "Música:"
+          - link "Green Sky — DSTechnician · Pixabay" [ref=f1e270] [cursor=pointer]:
+            - /url: https://pixabay.com/music/synthwave-green-sky-125179/
+  - button "Open Next.js Dev Tools" [ref=f1e23] [cursor=pointer]
+  - alert [ref=f1e27]

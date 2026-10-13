@@ -252,7 +252,7 @@ export function reproducirTicTac() {
 export function reproducirFunkLoop(): Promise<void> {
   if (typeof window === "undefined") return Promise.resolve();
   if (!funkAudio) {
-    funkAudio = new Audio("/music/carefree.mp3");
+    funkAudio = new Audio("/music/green-sky.mp3");
     funkAudio.loop = true;
     funkAudio.volume = 0.14;
     funkAudio.preload = "none";

@@ -7,9 +7,11 @@ import {
   ArrowRight,
   ArrowUpRight,
   Check,
+  ChevronDown,
   Coins,
   Gamepad2,
   House,
+  LogOut,
   Music2,
   ShoppingBag,
   UsersRound,
@@ -100,12 +102,95 @@ const cubes = [
   { emoji: "67", name: "Misterioso 67", price: 25000 },
 ];
 
-export default function GameHub() {
-  const [currentGame, setCurrentGame] = useState<GameId>(null);
+function nameInitials(name: string) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => Array.from(part)[0])
+    .join("")
+    .toUpperCase();
+}
+
+function AccountMenu({
+  name,
+  country,
+  avatar,
+  onSignOut,
+}: {
+  name: string;
+  country: string;
+  avatar: string | null;
+  onSignOut: () => void;
+}) {
+  return (
+    <details className="group relative shrink-0">
+      <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-full border border-white/10 bg-[#351e24] py-1 pl-1 pr-3 transition hover:border-white/25 hover:bg-[#40242c] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] [&::-webkit-details-marker]:hidden">
+        <span
+          aria-hidden="true"
+          className="grid size-9 place-items-center rounded-full border border-[#fff34b]/45 bg-[#392126] text-xs font-black text-[#fff34b]"
+        >
+          {avatar ?? nameInitials(name)}
+        </span>
+        <span className="hidden max-w-32 truncate text-sm font-bold sm:block">
+          {name}
+        </span>
+        <ChevronDown
+          className="size-4 text-white/60 transition group-open:rotate-180"
+          aria-hidden="true"
+        />
+        <span className="sr-only">Abrir menú de cuenta</span>
+      </summary>
+      <div className="absolute right-0 top-[calc(100%+0.65rem)] z-50 w-72 overflow-hidden rounded-2xl border border-white/15 bg-[#241519] shadow-[0_18px_50px_rgba(0,0,0,0.55)]">
+        <div className="flex items-center gap-3 px-4 py-4">
+          <span
+            aria-hidden="true"
+            className="grid size-11 shrink-0 place-items-center rounded-xl border border-[#fff34b]/45 bg-[#392126] text-lg font-black text-[#fff34b]"
+          >
+            {avatar ?? nameInitials(name)}
+          </span>
+          <div className="min-w-0">
+            <p className="truncate font-extrabold text-white">{name}</p>
+            <p className="truncate text-sm text-rose-100/60">{country}</p>
+          </div>
+        </div>
+        <div className="border-t border-white/10 p-2">
+          <button
+            type="button"
+            onClick={onSignOut}
+            className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-bold text-white/85 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-[#fff34b]"
+          >
+            <LogOut className="size-4 text-[#fff34b]" aria-hidden="true" />
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    </details>
+  );
+}
+
+export default function GameHub({
+  name,
+  country,
+  initialAvatar,
+  initialCoins,
+  onSignOut,
+}: {
+  name: string;
+  country: string;
+  initialAvatar: string | null;
+  initialCoins: number;
+  onSignOut: () => void;
+}) {
+  const [currentGame, setCurrentGame] = useState<GameId>(
+    initialAvatar ? null : "store",
+  );
   const [daysLeft, setDaysLeft] = useState(10);
   const [musicaActiva, setMusicaActiva] = useState(false);
-  const [coins, setCoins] = useState(0);
-  const [selectedCube, setSelectedCube] = useState<string | null>(null);
+  const [coins, setCoins] = useState(initialCoins);
+  const [selectedCube, setSelectedCube] = useState<string | null>(
+    initialAvatar,
+  );
 
   const handleGameSelect = (game: GameId) => {
     if (game === "store") {
@@ -165,27 +250,25 @@ export default function GameHub() {
   );
 
   if (currentGame === "hangman") {
-    return renderGame(
-      <HangmanGameWrapper onBack={() => setCurrentGame(null)} />,
-    );
+    return renderGame(<HangmanGameWrapper />);
   }
   if (currentGame === "tiragol") {
     return renderGame(<Tiragol onBack={() => setCurrentGame(null)} />);
   }
   if (currentGame === "noledes") {
-    return renderGame(<NoLeDesOPegale onBack={() => setCurrentGame(null)} />);
+    return renderGame(<NoLeDesOPegale />);
   }
   if (currentGame === "airhockey") {
-    return renderGame(<AirHockey onBack={() => setCurrentGame(null)} />);
+    return renderGame(<AirHockey />);
   }
   if (currentGame === "botecolor") {
-    return renderGame(<Botecolor onBack={() => setCurrentGame(null)} />);
+    return renderGame(<Botecolor />);
   }
   if (currentGame === "pinpon") {
-    return renderGame(<PinPon onBack={() => setCurrentGame(null)} />);
+    return renderGame(<PinPon />);
   }
   if (currentGame === "radiotricky") {
-    return renderGame(<Radiotricky onBack={() => setCurrentGame(null)} />);
+    return renderGame(<Radiotricky />);
   }
 
   if (currentGame === "friends") {
@@ -213,14 +296,23 @@ export default function GameHub() {
         <header className="flex min-h-20 items-center justify-between border-b border-white/10 bg-[#241318] px-5 sm:px-10">
           <button
             onClick={() => setCurrentGame(null)}
-            className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f5ee23]"
+            disabled={!selectedCube}
+            className="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-bold text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#f5ee23] disabled:cursor-not-allowed disabled:opacity-40"
           >
             <ArrowRight className="size-4 rotate-180" aria-hidden="true" />
-            Volver al hub
+            {selectedCube ? "Volver al hub" : "Elige un avatar para continuar"}
           </button>
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#392126] px-4 py-2 font-extrabold tabular-nums text-[#fff34b]">
-            <Coins className="size-5" aria-hidden="true" />
-            {coins.toLocaleString("es-CO")}
+          <div className="flex items-center gap-3">
+            <AccountMenu
+              name={name}
+              country={country}
+              avatar={selectedCube}
+              onSignOut={onSignOut}
+            />
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#392126] px-4 py-2 font-extrabold tabular-nums text-[#fff34b]">
+              <Coins className="size-5" aria-hidden="true" />
+              {coins.toLocaleString("es-CO")}
+            </div>
           </div>
         </header>
 
@@ -352,8 +444,37 @@ export default function GameHub() {
         >
           <a
             href="#inicio"
-            className="shrink-0 text-xl font-black uppercase tracking-[-0.045em] sm:text-2xl"
+            aria-label="Game Hub, inicio"
+            className="inline-flex shrink-0 items-center gap-2 text-xl font-black uppercase tracking-[-0.045em] sm:gap-2.5 sm:text-2xl"
           >
+            <svg
+              viewBox="0 0 48 48"
+              className="size-9 shrink-0 sm:size-10"
+              aria-hidden="true"
+            >
+              <path
+                d="M24 3.5 43.5 10v18.5c0 7.2-7.3 12.2-19.5 16C11.8 40.7 4.5 35.7 4.5 28.5V10L24 3.5Z"
+                fill="#351923"
+                stroke="#fff34b"
+                strokeWidth="2.5"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M21 16h-3.5a6.5 6.5 0 1 0 0 13H21v-5.5h-4"
+                fill="none"
+                stroke="#fff34b"
+                strokeWidth="3.5"
+                strokeLinecap="square"
+                strokeLinejoin="miter"
+              />
+              <path
+                d="M28 16v13m10-13v13m-10-6.5h10"
+                fill="none"
+                stroke="#fff"
+                strokeWidth="3.5"
+                strokeLinecap="square"
+              />
+            </svg>
             Game<span className="text-[#fff34b]">Hub</span>
           </a>
           <div className="hidden items-center gap-6 text-sm font-bold text-white/70 md:flex">
@@ -410,6 +531,12 @@ export default function GameHub() {
             <ShoppingBag className="size-[18px]" aria-hidden="true" />
             <span className="hidden sm:inline">Tienda</span>
           </button>
+          <AccountMenu
+            name={name}
+            country={country}
+            avatar={selectedCube}
+            onSignOut={onSignOut}
+          />
         </nav>
       </header>
 
@@ -539,20 +666,11 @@ export default function GameHub() {
             Música:{" "}
             <a
               className="underline underline-offset-2 hover:text-white"
-              href="https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400037"
+              href="https://pixabay.com/music/synthwave-green-sky-125179/"
               target="_blank"
               rel="noreferrer"
             >
-              Carefree — Kevin MacLeod
-            </a>{" "}
-            ·{" "}
-            <a
-              className="underline underline-offset-2 hover:text-white"
-              href="https://creativecommons.org/licenses/by/4.0/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              CC BY 4.0
+              Green Sky — DSTechnician · Pixabay
             </a>
           </p>
         </section>
