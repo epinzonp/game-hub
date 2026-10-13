@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
@@ -8,6 +9,7 @@ import {
   Check,
   Coins,
   Gamepad2,
+  House,
   Music2,
   ShoppingBag,
   UsersRound,
@@ -148,26 +150,42 @@ export default function GameHub() {
     return detenerFunkLoop;
   }, [currentGame, musicaActiva]);
 
+  const renderGame = (game: ReactNode) => (
+    <>
+      {game}
+      <button
+        type="button"
+        onClick={() => setCurrentGame(null)}
+        className="fixed left-4 top-4 z-[1000] inline-flex min-h-11 items-center gap-2 rounded-full border border-white/15 bg-[#241519]/95 px-4 py-2 text-sm font-bold text-white shadow-lg backdrop-blur transition hover:bg-[#392126] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b]"
+      >
+        <House className="size-4 text-[#fff34b]" aria-hidden="true" />
+        Volver al hub
+      </button>
+    </>
+  );
+
   if (currentGame === "hangman") {
-    return <HangmanGameWrapper onBack={() => setCurrentGame(null)} />;
+    return renderGame(
+      <HangmanGameWrapper onBack={() => setCurrentGame(null)} />,
+    );
   }
   if (currentGame === "tiragol") {
-    return <Tiragol onBack={() => setCurrentGame(null)} />;
+    return renderGame(<Tiragol onBack={() => setCurrentGame(null)} />);
   }
   if (currentGame === "noledes") {
-    return <NoLeDesOPegale onBack={() => setCurrentGame(null)} />;
+    return renderGame(<NoLeDesOPegale onBack={() => setCurrentGame(null)} />);
   }
   if (currentGame === "airhockey") {
-    return <AirHockey onBack={() => setCurrentGame(null)} />;
+    return renderGame(<AirHockey onBack={() => setCurrentGame(null)} />);
   }
   if (currentGame === "botecolor") {
-    return <Botecolor onBack={() => setCurrentGame(null)} />;
+    return renderGame(<Botecolor onBack={() => setCurrentGame(null)} />);
   }
   if (currentGame === "pinpon") {
-    return <PinPon onBack={() => setCurrentGame(null)} />;
+    return renderGame(<PinPon onBack={() => setCurrentGame(null)} />);
   }
   if (currentGame === "radiotricky") {
-    return <Radiotricky onBack={() => setCurrentGame(null)} />;
+    return renderGame(<Radiotricky onBack={() => setCurrentGame(null)} />);
   }
 
   if (currentGame === "friends") {
