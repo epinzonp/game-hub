@@ -93,12 +93,6 @@ export const games = [
 const avatarById = Object.fromEntries(
   avatars.map((avatar) => [avatar.id, avatar]),
 );
-const tierLabels: Record<string, string> = {
-  starter: "Inicial",
-  normal: "Normal",
-  rare: "Raro",
-  legendary: "Legendario",
-};
 const avatarRows = [
   {
     label: "Gratis y normales",
@@ -566,12 +560,9 @@ export default function GameHub({
                               className="avatar-portrait size-full object-cover"
                             />
                           </span>
-                          <span className="mt-5 flex w-full items-center justify-between gap-2">
+                          <span className="mt-5 block w-full">
                             <span className="truncate text-lg font-extrabold sm:text-xl">
                               {avatar.name}
-                            </span>
-                            <span className="shrink-0 text-[10px] font-black uppercase tracking-wider text-white/45">
-                              {tierLabels[avatar.tier]}
                             </span>
                           </span>
                         </button>
@@ -944,13 +935,13 @@ export default function GameHub({
             </h2>
           </div>
 
-          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:-mx-8 sm:gap-5 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 xl:grid-cols-4">
+          <div className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-4 sm:-mx-8 sm:gap-5 sm:px-8 lg:mx-0 lg:grid lg:grid-cols-3 lg:items-start lg:overflow-visible lg:px-0 xl:grid-cols-4">
             {games.map((game) => (
               <button
                 key={game.id}
                 type="button"
                 onClick={() => handleGameSelect(game.id)}
-                className="group w-[82vw] shrink-0 snap-start text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b] sm:w-[46vw] lg:w-auto"
+                className="group w-[82vw] shrink-0 snap-start self-start text-left focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#fff34b] sm:w-[46vw] lg:w-auto"
               >
                 <span className="relative block aspect-[16/9] overflow-hidden rounded-[14px] bg-[#321a20]">
                   <Image
