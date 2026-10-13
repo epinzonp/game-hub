@@ -93,12 +93,6 @@ export const games = [
 const avatarById = Object.fromEntries(
   avatars.map((avatar) => [avatar.id, avatar]),
 );
-const tierLabels: Record<string, string> = {
-  starter: "Inicial",
-  normal: "Normal",
-  rare: "Raro",
-  legendary: "Legendario",
-};
 const avatarRows = [
   {
     label: "Gratis y normales",
@@ -566,12 +560,9 @@ export default function GameHub({
                               className="avatar-portrait size-full object-cover"
                             />
                           </span>
-                          <span className="mt-5 flex w-full items-center justify-between gap-2">
+                          <span className="mt-5 block w-full">
                             <span className="truncate text-lg font-extrabold sm:text-xl">
                               {avatar.name}
-                            </span>
-                            <span className="shrink-0 text-[10px] font-black uppercase tracking-wider text-white/45">
-                              {tierLabels[avatar.tier]}
                             </span>
                           </span>
                         </button>
