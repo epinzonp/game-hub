@@ -20,8 +20,11 @@ import {
   House,
   LogOut,
   Music2,
+  Search,
   ShoppingBag,
+  Sparkles,
   Trophy,
+  UserRoundPlus,
   UsersRound,
   Volume2,
   VolumeX,
@@ -112,6 +115,60 @@ const avatarRows = [
     avatars: avatars.filter((avatar) => avatar.tier === "legendary"),
   },
 ];
+
+const featuredFriends = [
+  {
+    name: "Luna Nova",
+    handle: "@lunanova",
+    avatar: "aurora-koi",
+    status: "En línea",
+    activity: "Explorando el hub",
+    accent: "#b695ff",
+  },
+  {
+    name: "Max Volt",
+    handle: "@maxvolt",
+    avatar: "neon-raccoon",
+    status: "En una partida",
+    activity: "Tiragol",
+    accent: "#fff34b",
+  },
+  {
+    name: "Kai Eclipse",
+    handle: "@kaieclipse",
+    avatar: "shadow-raven",
+    status: "En línea",
+    activity: "Buscando equipo",
+    accent: "#5eead4",
+  },
+  {
+    name: "Sofi Pixel",
+    handle: "@sofipixel",
+    avatar: "astro-cat",
+    status: "Hace 5 min",
+    activity: "Última conexión reciente",
+    accent: "#fb7185",
+  },
+] as const;
+
+const friendRequests = [
+  {
+    name: "Nico Nova",
+    handle: "@niconova",
+    avatar: "cyber-gecko",
+    status: "Nueva",
+    activity: "Quiere formar equipo contigo",
+    accent: "#fff34b",
+  },
+  {
+    name: "Vale Cosmic",
+    handle: "@valecosmic",
+    avatar: "cosmic-wolf",
+    status: "Pendiente",
+    activity: "Te envió una invitación de amigo",
+    accent: "#b695ff",
+  },
+] as const;
 
 function AvatarPortrait({
   id,
@@ -301,6 +358,8 @@ export default function GameHub({
   const [purchasePending, setPurchasePending] = useState(false);
   const [purchaseError, setPurchaseError] = useState("");
   const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
+  const [friendQuery, setFriendQuery] = useState("");
+  const [socialTab, setSocialTab] = useState<"friends" | "requests">("friends");
 
   const selectAvatar = async (avatarId: string) => {
     const avatar = avatarById[avatarId as keyof typeof avatarById];
@@ -398,20 +457,136 @@ export default function GameHub({
   }
 
   if (currentGame === "friends") {
+    const normalizedQuery = friendQuery.trim().toLowerCase();
+    const people = socialTab === "friends" ? featuredFriends : friendRequests;
+    const visibleFriends = people.filter((friend) =>
+      `${friend.name} ${friend.handle} ${friend.activity}`
+        .toLowerCase()
+        .includes(normalizedQuery),
+    );
+
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-[#180e13] text-white">
-        <h1 className="text-6xl font-black italic">
-          MODO <span className="text-blue-500">AMIGOS</span>
-        </h1>
-        <p className="text-xl text-zinc-400">
-          Pronto podrás jugar contra tus amigos en tiempo real.
-        </p>
-        <button
-          onClick={() => setCurrentGame(null)}
-          className="rounded-xl bg-blue-600 px-8 py-3 font-bold hover:bg-blue-500"
-        >
-          Volver al Hub
-        </button>
+      <div className="min-h-screen w-full overflow-hidden bg-[#180e13] text-white">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-[480px] bg-[radial-gradient(circle_at_18%_0%,#7847b855,transparent_42%),radial-gradient(circle_at_82%_8%,#fff34b18,transparent_30%)]" />
+        <main className="relative mx-auto min-h-screen w-full max-w-7xl px-5 pb-16 pt-8 sm:px-8 lg:px-12">
+          <header className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
+            <button
+              type="button"
+              onClick={() => setCurrentGame(null)}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-white/15 bg-[#241519]/90 px-4 text-sm font-bold text-white/80 transition hover:border-white/30 hover:bg-[#392126] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b]"
+            >
+              <ArrowRight className="size-4 rotate-180" aria-hidden="true" />
+              Volver al hub
+            </button>
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#b695ff]/35 bg-[#291a32] px-4 py-2 text-xs font-black uppercase tracking-[0.15em] text-[#d7bcff]">
+              <Sparkles className="size-4 text-[#fff34b]" aria-hidden="true" />
+              Centro social
+            </div>
+          </header>
+
+          <section className="grid gap-8 pb-10 pt-12 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
+            <div>
+              <p className="mb-4 text-xs font-black uppercase tracking-[0.25em] text-[#b695ff]">
+                Conecta · descubre · juega
+              </p>
+              <h1 className="max-w-2xl text-5xl font-black leading-[0.95] tracking-[-0.06em] sm:text-7xl">
+                Encuentra tu próxima <span className="text-[#fff34b]">escuadra.</span>
+              </h1>
+              <p className="mt-5 max-w-xl text-base leading-7 text-rose-100/65 sm:text-lg">
+                Busca jugadores, mira quién está conectado y encuentra gente con ganas de entrar a una partida.
+              </p>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-[#241519]/85 p-5 shadow-[0_20px_60px_rgba(0,0,0,0.25)] backdrop-blur sm:p-6">
+              <div className="mb-5 grid grid-cols-2 gap-2 rounded-2xl bg-[#180e13] p-1.5" role="tablist" aria-label="Sección social">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={socialTab === "friends"}
+                  onClick={() => setSocialTab("friends")}
+                  className={`min-h-11 rounded-xl px-3 text-sm font-black transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] ${socialTab === "friends" ? "bg-[#fff34b] text-[#180e13] shadow-lg" : "text-white/55 hover:bg-white/10 hover:text-white"}`}
+                >
+                  Amigos
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={socialTab === "requests"}
+                  onClick={() => setSocialTab("requests")}
+                  className={`min-h-11 rounded-xl px-3 text-sm font-black transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b] ${socialTab === "requests" ? "bg-[#fff34b] text-[#180e13] shadow-lg" : "text-white/55 hover:bg-white/10 hover:text-white"}`}
+                >
+                  Invitaciones <span className="ml-1 opacity-70">{friendRequests.length}</span>
+                </button>
+              </div>
+              <label htmlFor="friend-search" className="mb-3 block text-sm font-extrabold text-white/80">
+                {socialTab === "friends" ? "Buscar amigos" : "Buscar invitaciones"}
+              </label>
+              <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-[#180e13] px-4 transition focus-within:border-[#fff34b]/70 focus-within:ring-2 focus-within:ring-[#fff34b]/20">
+                <Search className="size-5 shrink-0 text-[#fff34b]" aria-hidden="true" />
+                <input
+                  id="friend-search"
+                  value={friendQuery}
+                  onChange={(event) => setFriendQuery(event.target.value)}
+                  placeholder="Nombre, usuario o actividad"
+                  className="min-h-14 w-full bg-transparent text-sm font-semibold text-white outline-none placeholder:text-white/35"
+                />
+                <span className="hidden rounded-lg bg-white/10 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-white/45 sm:inline">
+                  Buscar
+                </span>
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs text-white/50">
+                <span>{visibleFriends.length} {socialTab === "friends" ? "jugadores encontrados" : "invitaciones encontradas"}</span>
+                <span className="inline-flex items-center gap-1.5 text-emerald-300"><span className="size-2 rounded-full bg-emerald-300 shadow-[0_0_10px_#6ee7b7]" /> Conectados ahora</span>
+              </div>
+            </div>
+          </section>
+
+          <section aria-labelledby="featured-friends-title">
+            <div className="mb-5 flex items-end justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-white/40">Descubrimiento</p>
+                <h2 id="featured-friends-title" className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">{socialTab === "friends" ? "Jugadores destacados" : "Invitaciones de amigo"}</h2>
+              </div>
+              <button type="button" className="hidden min-h-10 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 text-sm font-bold text-white/65 transition hover:bg-white/10 hover:text-white sm:inline-flex">
+                <UserRoundPlus className="size-4 text-[#fff34b]" aria-hidden="true" />
+                Añadir por código
+              </button>
+            </div>
+
+            {visibleFriends.length > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                {visibleFriends.map((friend) => (
+                  <article key={friend.handle} className="group relative overflow-hidden rounded-3xl border border-white/10 bg-[#241519]/90 p-5 shadow-[0_16px_35px_rgba(0,0,0,0.2)] transition duration-200 hover:-translate-y-1 hover:border-white/25 hover:bg-[#2d1a21]">
+                    <div className="absolute inset-x-0 top-0 h-24 opacity-50" style={{ background: `radial-gradient(circle at 50% 0%, ${friend.accent}55, transparent 70%)` }} />
+                    <div className="relative flex items-start justify-between gap-3">
+                      <div className="grid size-16 place-items-center overflow-hidden rounded-2xl border-2 bg-[#392126] shadow-lg" style={{ borderColor: `${friend.accent}99` }}>
+                        <AvatarPortrait id={friend.avatar} size={64} className="size-full object-cover" />
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-300/10 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-300">
+                        <span className="size-1.5 rounded-full bg-emerald-300" />
+                        {friend.status}
+                      </span>
+                    </div>
+                    <div className="relative mt-5">
+                      <h3 className="truncate text-lg font-black">{friend.name}</h3>
+                      <p className="mt-1 text-xs font-semibold text-white/40">{friend.handle}</p>
+                      <p className="mt-4 min-h-10 text-sm leading-5 text-rose-100/65">{friend.activity}</p>
+                    </div>
+                    <button type="button" className="mt-5 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 text-sm font-black text-white/80 transition hover:border-[#fff34b]/50 hover:bg-[#fff34b] hover:text-[#180e13] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#fff34b]">
+                      <UserRoundPlus className="size-4" aria-hidden="true" />
+                      {socialTab === "friends" ? "Añadir amigo" : "Aceptar invitación"}
+                    </button>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-3xl border border-dashed border-white/15 bg-[#241519]/70 px-6 py-14 text-center">
+                <Search className="mx-auto size-8 text-white/35" aria-hidden="true" />
+                <h3 className="mt-4 text-lg font-black">No encontramos ese jugador</h3>
+                <p className="mt-2 text-sm text-white/50">Prueba con otro nombre, usuario o actividad.</p>
+              </div>
+            )}
+          </section>
+        </main>
       </div>
     );
   }
