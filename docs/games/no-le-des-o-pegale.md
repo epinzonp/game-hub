@@ -6,4 +6,4 @@
 
 **Difficulty:** Fácil: 1,000 ms between appearances and 800 ms visible; Medio: 700/600 ms; Difícil: 500/400 ms; Imposible: 300/250 ms.
 
-**Completion and scoring:** The timer reaching zero ends the round and displays the score. Retry resets the timer and score. Scores are not saved to player records.
+**Completion and scoring:** The timer reaching zero completes the round and displays the score. Reaching 6 or more hits is a win: it awards 100 coins to the signed-in player and shows a green animated `100+` reward indicator. Fewer than 6 hits awards nothing and does not show the reward. Retry resets the timer and score; the reward is granted once per completed winning round.

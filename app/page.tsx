@@ -45,6 +45,7 @@ export function GameHubShell({
   const login = useAction(api.accounts.login);
   const purchaseAvatar = useMutation(api.players.purchaseAvatar);
   const awardWin = useMutation(api.players.awardWin);
+  const awardTiragolGoal = useMutation(api.players.awardTiragolGoal);
   const signOut = useMutation(api.players.signOut);
   const legacySnapshot = useSyncExternalStore(
     subscribeToLegacyProgress,
@@ -117,6 +118,9 @@ export function GameHubShell({
         }}
         onWin={async () => {
           await awardWin({ sessionToken });
+        }}
+        onTiragolGoal={async () => {
+          await awardTiragolGoal({ sessionToken });
         }}
         onSignOut={() => {
           void signOut({ sessionToken })

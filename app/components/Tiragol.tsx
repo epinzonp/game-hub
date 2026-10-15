@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { reproducirRisa, reproducirVictoria } from "@/lib/sonido";
 import confetti from "canvas-confetti";
 import GameEntryScreen from "./GameEntryScreen";
+import { useGameProgress } from "./GameNavigationGuard";
 
 type GameState = "aiming" | "shooting" | "result";
 type Result = "goal" | "miss" | "saved";
 
 function FloatingCup() {
-  const [pos, setPos] = useState({ x: Math.random() * 100, y: 110 });
+  const [pos, setPos] = useState({ x: 50, y: 110 });
   
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,7 +33,7 @@ function FloatingCup() {
 }
 
 function FloatingSadFace() {
-  const [pos, setPos] = useState({ x: Math.random() * 100, y: 110 });
+  const [pos, setPos] = useState({ x: 50, y: 110 });
   
   useEffect(() => {
     const interval = setInterval(() => {
@@ -54,17 +55,25 @@ function FloatingSadFace() {
   );
 }
 
-export default function Tiragol({ onBack }: { onBack: () => void }) {
+export default function Tiragol({
+  onBack,
+  onGoal,
+}: {
+  onBack: () => void;
+  onGoal: () => Promise<void>;
+}) {
   const [started, setStarted] = useState(false);
   const [state, setState] = useState<GameState>("aiming");
   const [ballPos, setBallPos] = useState({ x: 0, y: 0 });
-  const [goalPos, setGoalPos] = useState({ x: 0, y: 0 });
   const [keeperPos, setKeeperPos] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
   const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(0);
+  const [coinRewardId, setCoinRewardId] = useState(0);
+  useGameProgress(started);
 
   const handleShoot = () => {
+    setAttempts((attempt) => attempt + 1);
     setState("shooting");
     
     // Portero elige dirección aleatoria: -1 (izq), 0 (centro), 1 (der)
@@ -97,6 +106,8 @@ export default function Tiragol({ onBack }: { onBack: () => void }) {
         const newScore = score + 1;
         setScore(newScore);
         setResult("goal");
+        setCoinRewardId((rewardId) => rewardId + 1);
+        void onGoal().catch(() => undefined);
         reproducirVictoria();
         confetti({
           particleCount: 150,
@@ -118,12 +129,9 @@ export default function Tiragol({ onBack }: { onBack: () => void }) {
     setBallPos({ x: 0, y: 0 });
     setKeeperPos(0);
     setResult(null);
+    setCoinRewardId(0);
     setState("aiming");
   };
-
-  useEffect(() => {
-    setAttempts(a => a + 1);
-  }, [result]);
 
   if (!started) {
     return (
@@ -145,7 +153,7 @@ export default function Tiragol({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 p-4 text-center bg-green-900 text-white overflow-hidden">
+    <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-[#180e13] p-4 text-center text-white overflow-hidden">
       <div className="flex justify-between w-full max-w-2xl text-2xl font-bold">
         <div>Goles: <span className="text-amber-400">{score}</span></div>
         <div className="text-sm self-center">Tiragol ⚽</div>
@@ -153,6 +161,16 @@ export default function Tiragol({ onBack }: { onBack: () => void }) {
       </div>
 
       <div className="relative w-full max-w-3xl h-[400px] bg-green-700 border-b-8 border-green-800 rounded-t-3xl flex items-end justify-center pb-10 overflow-hidden">
+        {result === "goal" && (
+          <div
+            key={coinRewardId}
+            role="status"
+            aria-label="Ganaste 10 monedas"
+            className="pointer-events-none absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 text-6xl font-black text-green-300 drop-shadow-[0_5px_0_#14532d] coin-reward-pop"
+          >
+            10+
+          </div>
+        )}
         {result === "goal" && (
           <div className="absolute inset-0 pointer-events-none">
             {[...Array(15)].map((_, i) => <FloatingCup key={i} />)}

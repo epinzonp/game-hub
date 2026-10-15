@@ -233,6 +233,22 @@ export const awardWin = mutation({
   },
 });
 
+export const awardTiragolGoal = mutation({
+  args: sessionArgs,
+  returns: v.null(),
+  handler: async (ctx, { sessionToken }) => {
+    const player = await currentPlayer(ctx, sessionToken);
+    const coins = (player.coins ?? 0) + 10;
+    if (!Number.isSafeInteger(coins))
+      throw new ConvexError("El saldo alcanzó su límite.");
+    await ctx.db.patch(player._id, {
+      coins,
+      maxCoins: Math.max(player.maxCoins, coins),
+    });
+    return null;
+  },
+});
+
 export const purchaseAvatar = mutation({
   args: { ...sessionArgs, avatar: v.string() },
   returns: v.null(),

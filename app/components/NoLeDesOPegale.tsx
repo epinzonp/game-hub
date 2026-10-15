@@ -1,15 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { reproducirTicTac } from "@/lib/sonido";
 import GameEntryScreen from "./GameEntryScreen";
+import { useGameProgress } from "./GameNavigationGuard";
 
-export default function NoLeDesOPegale() {
+export default function NoLeDesOPegale({
+  onWin,
+}: {
+  onWin: () => Promise<void>;
+}) {
   const [score, setScore] = useState(0);
   const [activeHole, setActiveHole] = useState<number | null>(null);
   const [timeLeft, setTimeLeft] = useState(30);
   const [gameState, setGameState] = useState<"start" | "playing" | "ended">("start");
   const [difficulty, setDifficulty] = useState<"facil" | "medio" | "dificil" | "imposible">("facil");
+  const [rewardError, setRewardError] = useState("");
+  const rewardGranted = useRef(false);
+
+  useGameProgress(gameState !== "start");
 
   const difficultyConfig = {
     facil: { speed: 1000, visible: 800 },
@@ -46,6 +55,23 @@ export default function NoLeDesOPegale() {
       clearInterval(gameInterval);
     };
   }, [gameState, difficulty]);
+
+  useEffect(() => {
+    if (gameState === "playing") {
+      rewardGranted.current = false;
+      return;
+    }
+    if (gameState !== "ended" || rewardGranted.current) return;
+
+    rewardGranted.current = true;
+    if (score < 6) return;
+
+    void onWin().catch(() =>
+      setRewardError(
+        "No pudimos guardar las monedas de esta ronda. Revisa tu conexión.",
+      ),
+    );
+  }, [gameState, onWin, score]);
 
   const handleHit = (index: number) => {
     if (index === activeHole) {
@@ -102,14 +128,29 @@ export default function NoLeDesOPegale() {
 
   if (gameState === "ended") {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 bg-zinc-900 text-white">
+      <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 bg-[#180e13] text-white">
+        {score >= 6 && (
+          <div
+            role="status"
+            aria-label="Ganaste 100 monedas"
+            className="pointer-events-none text-6xl font-black text-green-400 drop-shadow-[0_5px_0_#14532d] coin-reward-pop"
+          >
+            100+
+          </div>
+        )}
         <h1 className="text-6xl font-black italic">FIN DEL JUEGO</h1>
         <p className="text-3xl font-bold text-amber-400">Puntuación: {score}</p>
+        {rewardError && (
+          <p role="alert" className="text-sm text-rose-200">
+            {rewardError}
+          </p>
+        )}
         <div className="flex gap-4">
           <button 
             onClick={() => {
               setScore(0);
               setTimeLeft(30);
+              setRewardError("");
               setGameState("playing");
             }} 
             className="rounded-xl bg-red-600 px-8 py-3 font-bold hover:bg-red-500 transition-all"
@@ -122,7 +163,7 @@ export default function NoLeDesOPegale() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-zinc-900 text-white">
+    <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-[#180e13] text-white">
       <div className="flex justify-between w-full max-w-md px-4 mb-4">
         <div className="text-2xl font-bold">Tiempo: <span className="text-red-500">{timeLeft}s</span></div>
         <div className="text-2xl font-bold">Score: <span className="text-amber-400">{score}</span></div>

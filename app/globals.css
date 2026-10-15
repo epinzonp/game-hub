@@ -16,6 +16,28 @@
   }
 }
 
+@keyframes coin-reward-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -35%) scale(0.35) rotate(-14deg);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.18) rotate(8deg);
+  }
+  42% {
+    transform: translate(-50%, -55%) scale(0.96) rotate(-4deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -125%) scale(1.05) rotate(9deg);
+  }
+}
+
+.coin-reward-pop {
+  animation: coin-reward-pop 1.25s cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
 @keyframes avatar-ultimate {
   from {
     box-shadow:

@@ -27,7 +27,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
-import { detenerFunkLoop, reproducirFunkLoop } from "@/lib/sonido";
+import { useMusic } from "./MusicProvider";
 import HangmanGameWrapper from "./HangmanGameWrapper";
 import Tiragol from "./Tiragol";
 import AirHockey from "./AirHockey";
@@ -264,6 +264,7 @@ export default function GameHub({
   onSignOut,
   onPurchase,
   onWin,
+  onTiragolGoal,
   startInStore = false,
   startInProfile = false,
 }: {
@@ -277,6 +278,7 @@ export default function GameHub({
   onSignOut: () => void;
   onPurchase: (avatar: string) => Promise<void>;
   onWin: () => Promise<void>;
+  onTiragolGoal: () => Promise<void>;
   startInStore?: boolean;
   startInProfile?: boolean;
 }) {
@@ -292,7 +294,7 @@ export default function GameHub({
             ? "store"
             : null),
   );
-  const [musicaActiva, setMusicaActiva] = useState(false);
+  const { active: musicaActiva, setActive: setMusicaActiva } = useMusic();
   const coins = initialCoins;
   const selectedCube = normalizeAvatarId(initialAvatar);
   const ownedAvatarIds = new Set(ownedAvatars);
@@ -341,15 +343,6 @@ export default function GameHub({
   };
 
   useEffect(() => {
-    if (currentGame !== null || !musicaActiva) {
-      detenerFunkLoop();
-      return;
-    }
-    void reproducirFunkLoop().catch(() => setMusicaActiva(false));
-    return detenerFunkLoop;
-  }, [currentGame, musicaActiva]);
-
-  useEffect(() => {
     if (initialGame && !selectedCube) router.replace("/store");
   }, [initialGame, router, selectedCube]);
 
@@ -381,27 +374,32 @@ export default function GameHub({
     );
   }
   if (currentGame === "tiragol") {
-    return renderGame(<Tiragol onBack={() => requestNavigation("/")} />);
+    return renderGame(
+      <Tiragol
+        onBack={() => requestNavigation("/")}
+        onGoal={onTiragolGoal}
+      />,
+    );
   }
   if (currentGame === "noledes") {
-    return renderGame(<NoLeDesOPegale />);
+    return renderGame(<NoLeDesOPegale onWin={onWin} />);
   }
   if (currentGame === "airhockey") {
-    return renderGame(<AirHockey />);
+    return renderGame(<AirHockey onWin={onWin} />);
   }
   if (currentGame === "botecolor") {
-    return renderGame(<Botecolor />);
+    return renderGame(<Botecolor onWin={onWin} />);
   }
   if (currentGame === "pinpon") {
-    return renderGame(<PinPon />);
+    return renderGame(<PinPon onWin={onWin} />);
   }
   if (currentGame === "radiotricky") {
-    return renderGame(<Radiotricky />);
+    return renderGame(<Radiotricky onWin={onWin} />);
   }
 
   if (currentGame === "friends") {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-zinc-900 text-white">
+      <div className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-[#180e13] text-white">
         <h1 className="text-6xl font-black italic">
           MODO <span className="text-blue-500">AMIGOS</span>
         </h1>

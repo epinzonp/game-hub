@@ -3,14 +3,19 @@
 import React, { useState, useEffect, useRef } from "react";
 import { reproducirFunkVictoria, reproducirTicTac } from "../../lib/sonido";
 import GameEntryScreen from "./GameEntryScreen";
+import { useGameProgress } from "./GameNavigationGuard";
 
 type Difficulty = "easy" | "medium" | "hard" | "impossible";
 
-export default function PinPon() {
+export default function PinPon({ onWin }: { onWin: () => Promise<void> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [score, setScore] = useState({ player: 0, ai: 0 });
   const [gameState, setGameState] = useState<"menu" | "difficulty" | "playing" | "gameOver">("menu");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
+  const [rewardError, setRewardError] = useState("");
+  const rewardGranted = useRef(false);
+
+  useGameProgress(gameState === "playing" || gameState === "gameOver");
   
   const stateRef = useRef({
     playerY: 0,
@@ -21,6 +26,19 @@ export default function PinPon() {
     ballDY: 0,
     score: { player: 0, ai: 0 }
   });
+
+  useEffect(() => {
+    if (gameState === "playing") {
+      rewardGranted.current = false;
+      return;
+    }
+    if (gameState !== "gameOver" || score.player < 5 || rewardGranted.current)
+      return;
+    rewardGranted.current = true;
+    void onWin().catch(() =>
+      setRewardError("No pudimos guardar las monedas de esta victoria. Revisa tu conexión."),
+    );
+  }, [gameState, onWin, score.player]);
 
     useEffect(() => {
       if (gameState !== "playing") return;
@@ -189,7 +207,7 @@ export default function PinPon() {
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 p-4 overflow-hidden relative bg-zinc-950">
+    <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 bg-[#180e13] p-4 overflow-hidden relative">
       <div className="flex items-center justify-between w-full max-w-md mb-4">
         <h1 className="text-4xl font-black italic text-white">PIN <span className="text-amber-500">PON</span></h1>
       </div>
@@ -208,9 +226,19 @@ export default function PinPon() {
              className="border-4 border-zinc-800 rounded-xl bg-black"
            />
            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 rounded-xl">
+            {score.player >= 5 && (
+              <div
+                role="status"
+                aria-label="Ganaste 100 monedas"
+                className="pointer-events-none mb-4 text-6xl font-black text-green-400 drop-shadow-[0_5px_0_#14532d] coin-reward-pop"
+              >
+                100+
+              </div>
+            )}
              <h2 className={`text-6xl font-black mb-8 ${score.player >= 5 ? 'text-white' : 'text-red-600'}`}>
                {score.player >= 5 ? "NEGRO GANA" : "ROJO GANA"}
              </h2>
+            {rewardError && <p role="alert" className="mb-4 text-sm text-rose-200">{rewardError}</p>}
              <button 
                onClick={() => {
                  setScore({ player: 0, ai: 0 });

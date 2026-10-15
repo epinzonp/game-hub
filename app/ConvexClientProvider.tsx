@@ -3,6 +3,7 @@
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import type { ReactNode } from "react";
 import GameNavigationGuard from "@/app/components/GameNavigationGuard";
+import { MusicProvider } from "@/app/components/MusicProvider";
 
 const url = process.env.NEXT_PUBLIC_CONVEX_URL;
 const client = url ? new ConvexReactClient(url) : null;
@@ -20,7 +21,9 @@ export default function ConvexClientProvider({
     );
   return (
     <ConvexProvider client={client}>
-      <GameNavigationGuard>{children}</GameNavigationGuard>
+      <MusicProvider>
+        <GameNavigationGuard>{children}</GameNavigationGuard>
+      </MusicProvider>
     </ConvexProvider>
   );
 }

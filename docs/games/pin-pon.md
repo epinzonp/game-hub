@@ -6,4 +6,4 @@
 
 **Difficulty:** Choose Fácil, Medio, Difícil, or Imposible. The setting changes how quickly the AI paddle follows the ball.
 
-**Completion and scoring:** The first side to five points ends the match. A rematch resets the score. Scores are session-only and are not saved to player records.
+**Completion and scoring:** The first side to five points ends the match. A player victory against the AI awards 100 coins and shows a green animated `100+` reward indicator. Defeats award nothing. A rematch resets the score; match scores are session-only.

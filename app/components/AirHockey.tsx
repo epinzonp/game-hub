@@ -3,17 +3,26 @@
 import React, { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import GameEntryScreen from "./GameEntryScreen";
+import { useGameProgress } from "./GameNavigationGuard";
 
 type GameState = "menu" | "difficulty" | "playing" | "result";
 type Opponent = "AI" | "Player";
 type Difficulty = "easy" | "medium" | "hard" | "impossible";
 
-export default function AirHockey() {
+export default function AirHockey({
+  onWin,
+}: {
+  onWin: () => Promise<void>;
+}) {
   const [state, setState] = useState<GameState>("menu");
   const [opponent, setOpponent] = useState<Opponent>("AI");
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
   const [score, setScore] = useState({ player: 0, enemy: 0 });
   const [winner, setWinner] = useState<string | null>(null);
+  const [rewardError, setRewardError] = useState("");
+  const rewardGranted = useRef(false);
+
+  useGameProgress(state === "playing" || winner !== null);
 
   // Game constants
   const TABLE_WIDTH = 400;
@@ -162,6 +171,22 @@ export default function AirHockey() {
     };
   }, [state, opponent]);
 
+  useEffect(() => {
+    if (state === "playing" && winner === null) {
+      rewardGranted.current = false;
+      return;
+    }
+    if (winner !== "Player" || opponent !== "AI" || rewardGranted.current)
+      return;
+
+    rewardGranted.current = true;
+    void onWin().catch(() =>
+      setRewardError(
+        "No pudimos guardar las monedas de esta victoria. Revisa tu conexión.",
+      ),
+    );
+  }, [onWin, opponent, state, winner]);
+
   const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     let clientX, clientY;
@@ -220,16 +245,30 @@ export default function AirHockey() {
 
   if (winner) {
     return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 bg-zinc-900 text-white">
+      <div className="flex h-screen w-screen flex-col items-center justify-center gap-6 bg-[#180e13] text-white">
+        {winner === "Player" && opponent === "AI" && (
+          <div
+            role="status"
+            aria-label="Ganaste 100 monedas"
+            className="pointer-events-none text-6xl font-black text-green-400 drop-shadow-[0_5px_0_#14532d] coin-reward-pop"
+          >
+            100+
+          </div>
+        )}
         <h2 className="text-5xl font-black">¡{winner === "Player" ? "GANASTE!" : "PERDISTE!"}</h2>
         <div className="text-2xl">Final: {score.player} - {score.enemy}</div>
+        {rewardError && (
+          <p role="alert" className="text-sm text-rose-200">
+            {rewardError}
+          </p>
+        )}
         <button onClick={() => { setWinner(null); setScore({ player: 0, enemy: 0 }); setState("menu"); }} className="rounded-xl bg-blue-600 px-8 py-3 font-bold">Jugar de nuevo</button>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen w-screen flex-col items-center justify-center gap-4 bg-zinc-900 text-white overflow-hidden">
+    <div className="flex h-screen w-screen flex-col items-center justify-center gap-4 bg-[#180e13] text-white overflow-hidden">
       <div className="flex gap-20 text-4xl font-black mb-2">
         <div className="text-red-500">{score.enemy}</div>
         <div className="text-blue-500">{score.player}</div>

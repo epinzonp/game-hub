@@ -6,4 +6,4 @@
 
 **Difficulty:** AI matches offer Fácil, Medio, Difícil, and Imposible. Higher settings make the AI paddle move faster toward the puck.
 
-**Completion and scoring:** The first goal wins the match. The match score and result remain in the current session only; no player record is saved.
+**Completion and scoring:** The first goal wins the match. A win against the AI awards 100 coins to the signed-in player and shows a green animated `100+` reward indicator at the end. Defeats and matches against another player award nothing. The match score and result remain in the current session only.

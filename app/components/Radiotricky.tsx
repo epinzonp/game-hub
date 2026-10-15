@@ -1,14 +1,15 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import GameEntryScreen from "./GameEntryScreen";
+import { useGameProgress } from "./GameNavigationGuard";
 
 type Cell = "X" | "O" | "draw" | null;
 type Player = "X" | "O";
 type GameMode = "pvp" | "ai";
 type Difficulty = "easy" | "medium" | "hard";
 
-export default function Radiotricky() {
+export default function Radiotricky({ onWin }: { onWin: () => Promise<void> }) {
   const [board, setBoard] = useState<Cell[]>(Array(9).fill(null));
   const [currentPlayer, setCurrentPlayer] = useState<Player>("X");
   const [winner, setWinner] = useState<Cell>(null);
@@ -17,12 +18,28 @@ export default function Radiotricky() {
   const [difficulty, setDifficulty] = useState<Difficulty>("easy");
   const [score, setScore] = useState({ X: 0, O: 0, draws: 0 });
   const [showModeSelect, setShowModeSelect] = useState(true);
+  const [rewardError, setRewardError] = useState("");
+  const rewardGranted = useRef(false);
+
+  useGameProgress(!showModeSelect);
 
   const winningCombos = [
     [0, 1, 2], [3, 4, 5], [6, 7, 8],
     [0, 3, 6], [1, 4, 7], [2, 5, 8],
     [0, 4, 8], [2, 4, 6]
   ];
+
+  useEffect(() => {
+    if (!winner) {
+      rewardGranted.current = false;
+      return;
+    }
+    if (winner !== "X" || mode !== "ai" || rewardGranted.current) return;
+    rewardGranted.current = true;
+    void onWin().catch(() =>
+      setRewardError("No pudimos guardar las monedas de esta victoria. Revisa tu conexión."),
+    );
+  }, [mode, onWin, winner]);
 
   const checkWinner = (b: Cell[]): { winner: Cell; line: number[] } | null => {
     for (const combo of winningCombos) {
@@ -198,9 +215,19 @@ export default function Radiotricky() {
       {winner && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-xl">
           <div className="text-center p-8 bg-zinc-900/90 rounded-2xl border-2 border-green-400">
+            {winner === "X" && mode === "ai" && (
+              <div
+                role="status"
+                aria-label="Ganaste 100 monedas"
+                className="pointer-events-none mb-4 text-6xl font-black text-green-400 drop-shadow-[0_5px_0_#14532d] coin-reward-pop"
+              >
+                100+
+              </div>
+            )}
             <h2 className="text-4xl font-black mb-4 text-green-400">
               {winner === "draw" ? "EMPATE" : `GANA ${winner === "X" ? "✕" : "◯"}!`}
             </h2>
+            {rewardError && <p role="alert" className="mb-4 text-sm text-rose-200">{rewardError}</p>}
             <div className="flex gap-4 justify-center">
               <button onClick={resetGame} className="bg-green-400 text-zinc-900 px-6 py-2 rounded-xl font-bold hover:bg-green-300">Revancha</button>
               <button onClick={resetScore} className="bg-zinc-700 text-zinc-300 px-6 py-2 rounded-xl font-bold">Reiniciar</button>
